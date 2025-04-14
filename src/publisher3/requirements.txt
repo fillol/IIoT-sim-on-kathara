@@ -1,0 +1,4 @@
+paho-mqtt==1.6.1
+numpy==1.24.3
+Faker==18.12.0
+asyncio-mqtt==0.12.1  # Aggiunto

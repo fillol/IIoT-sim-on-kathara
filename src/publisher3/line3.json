@@ -1,0 +1,11 @@
+{
+    "line_id": "PAINT-LINE-3",
+    "sensors": [
+        {
+            "type": "temperature",
+            "interval": 5.0,
+            "payload": "large",
+            "qos": 0
+        }
+    ]
+}

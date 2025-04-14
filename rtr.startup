@@ -1,0 +1,16 @@
+#!/bin/bash
+
+ip addr add 10.0.1.1/24 dev eth0
+ip addr add 10.0.2.1/24 dev eth1
+ip addr add 10.0.3.1/24 dev eth2
+ip addr add 10.0.4.1/24 dev eth3
+ip addr add 10.0.5.1/24 dev eth4
+ip link set eth0 up
+ip link set eth1 up
+ip link set eth2 up
+ip link set eth3 up
+ip link set eth4 up
+
+# Abilitazione IP Forwarding
+echo 1 > /proc/sys/net/ipv4/ip_forward
+sysctl -w net.ipv4.ip_forward=1

@@ -1,0 +1,17 @@
+{
+    "line_id": "WELDING-LINE-2",
+    "sensors": [
+        {
+            "type": "quality",
+            "interval": 10.0,
+            "payload": "large",
+            "qos": 2
+        },
+        {
+            "type": "vibration",
+            "interval": 1.0,
+            "payload": "medium",
+            "qos": 1
+        }
+    ]
+}

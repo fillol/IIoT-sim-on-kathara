@@ -1,0 +1,17 @@
+{
+    "line_id": "PRESS-LINE-1",
+    "sensors": [
+        {
+            "type": "vibration",
+            "interval": 0.5,
+            "payload": "small",
+            "qos": 2
+        },
+        {
+            "type": "temperature",
+            "interval": 2.0,
+            "payload": "medium",
+            "qos": 1
+        }
+    ]
+}

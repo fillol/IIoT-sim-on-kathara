@@ -1,0 +1,12 @@
+services:
+  control-center:
+    build: ./control-center
+
+  production-line-1:
+    build: ./publisher1
+
+  production-line-2:
+    build: ./publisher2
+
+  production-line-3:
+    build: ./publisher3
