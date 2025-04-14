@@ -1,15 +1,15 @@
-# Industrial IoT Simulator on Kathara
+# Industrial IoT Simulator on Kathará
 
 ![Industry 4.0](https://img.shields.io/badge/-Industry%204.0-4CAF50?logo=industry&logoColor=FFFF00)
 ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=ffd343)
 ![MQTT](https://img.shields.io/badge/-MQTT-660099?logo=mosquitto&logoColor=white)
 ![Docker](https://img.shields.io/badge/-Docker-2496ED?logo=docker&logoColor=white)
-![Kathara](https://img.shields.io/badge/-Kathara-blue?logo=linux&logoColor=white) ![GitHub License](https://img.shields.io/badge/License-MIT-ff69b4)
+![Kathará](https://img.shields.io/badge/-Kathara-blue?logo=linux&logoColor=white) ![GitHub License](https://img.shields.io/badge/License-MIT-ff69b4)
 
-This project ports the original [Industrial IoT Simulator](https://github.com/fillol/IIoT-simulator) to run within the [Kathara](https://github.com/KatharaFramework/Kathara) network simulation environment. It allows simulating an Industrial IoT (IIoT) setup using Docker containers orchestrated by Kathara, providing a flexible platform for testing network interactions, security postures, and data flow patterns in complex IIoT scenarios.
+This project ports the original [Industrial IoT Simulator](https://github.com/fillol/IIoT-simulator) to run within the [Kathara](https://github.com/KatharaFramework/Kathara) network simulation environment. It allows simulating an Industrial IoT (IIoT) setup using Docker containers orchestrated by Kathará, providing a flexible platform for testing network interactions, security postures, and data flow patterns in complex IIoT scenarios.
 
 ## 📜 How it Works
-This simulator emulates three production lines (pressing, welding, painting) with virtual sensors compliant with Industry 4.0 standards. It generates realistic data (vibration, temperature, quality) transmitted via MQTT over a Kathara-managed network to a central control center with predictive alert logic.
+This simulator emulates three production lines (pressing, welding, painting) with virtual sensors compliant with Industry 4.0 standards. It generates realistic data (vibration, temperature, quality) transmitted via MQTT over a Kathará-managed network to a central control center with predictive alert logic.
 
 ### Key Features (Inherited from original):
 * **Realistic Sensor Data**: Vibration (ISO 10816 principles), Temperature (ISO 13732 principles), Quality Control metrics.
@@ -17,15 +17,15 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 * **Modular Design**: Separate containers for production lines, MQTT broker, and control center.
 * **Dynamic Configuration**: Sensor behavior defined in JSON files, decoupled from Python logic.
 
-### Kathara Adaptation:
-* Uses Kathara for network topology definition and container orchestration (`lab.conf`, `.startup` files).
-* Allows for complex network setups (routers, different subnets) managed by Kathara.
-* Provides interactive shells into each component via Kathara.
+### Kathará Adaptation:
+* Uses Kathará for network topology definition and container orchestration (`lab.conf`, `.startup` files).
+* Allows for complex network setups (routers, different subnets) managed by Kathará.
+* Provides interactive shells into each component via Kathará.
 
 ## 🚀 Usage
 
 ### Prerequisites
-* [Kathara](https://github.com/KatharaFramework/Kathara) installed.
+* [Kathará](https://github.com/KatharaFramework/Kathara) installed.
 * Docker and Docker Compose (used for building images).
 * Python 3.10+ (Optional: for potential local script testing).
 
@@ -33,8 +33,8 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/fillol/IIoT-sim-on-kathara.git](https://github.com/fillol/IIoT-sim-on-kathara.git)
-    cd IIoT-sim-on-kathara
+    git clone https://github.com/fillol/IIoT-sim-on-Kathará.git
+    cd IIoT-sim-on-Kathará
     ```
 
 2.  **Build the Docker Images:**
@@ -44,11 +44,11 @@ This simulator emulates three production lines (pressing, welding, painting) wit
     docker compose -f src/compose.yml build
     ```
 
-3.  **Launch the Kathara Lab:**
-    Use the `kathara lstart` command to start the network simulation environment defined in `lab.conf`.
+3.  **Launch the Kathará Lab:**
+    Use the `Kathara lstart` command to start the network simulation environment defined in `lab.conf`.
     *Important:* This often requires `sudo` permissions.
     ```bash
-    sudo kathara lstart
+    sudo Kathara lstart
     ```
     This command will:
     * Read `lab.conf` to understand the network topology and devices (p1, p2, p3, cc, mqtt, rtr).
@@ -57,42 +57,42 @@ This simulator emulates three production lines (pressing, welding, painting) wit
     * Open terminal windows connected to each running container (p1, p2, p3, cc, mqtt, rtr).
 
 4.  **Monitor the Simulation:**
-    * **Kathara Terminals**: The terminals opened by `kathara lstart` provide direct shell access. However, due to the `entrypoint.sh` workaround (see notes below), the main Python scripts might not output directly to these terminals initially.
+    * **Kathará Terminals**: The terminals opened by `Kathara lstart` provide direct shell access. However, due to the `entrypoint.sh` workaround (see notes below), the main Python scripts might not output directly to these terminals initially.
     * **Docker Logs**: The primary way to see the simulator's output (sensor data, control center messages) is via `docker logs`. The container names are typically defined in `lab.conf` (e.g., `p1`, `p2`, `p3`, `cc`, `mqtt`).
         ```bash
         # Example: View logs for production line 1 and the control center
         docker logs p1 -f
         docker logs cc -f
         ```
-    * **Manual Execution (If Needed)**: Sometimes, the main scripts might not start automatically within the Kathara environment. If you don't see output in `docker logs` after a short while, you may need to manually start them in the respective Kathara terminals:
+    * **Manual Execution (If Needed)**: Sometimes, the main scripts might not start automatically within the Kathará environment. If you don't see output in `docker logs` after a short while, you may need to manually start them in the respective Kathará terminals:
         * In the `p1` terminal: `python main.py`
         * In the `p2` terminal: `python main.py`
         * In the `p3` terminal: `python main.py`
         * In the `cc` terminal: `python main.py`
         (The `mqtt` broker and `rtr` usually don't require manual intervention if their startup scripts are configured correctly).
 
-### Kathara Specific Notes:
-* **Entrypoint Workaround**: Each service (`p1`, `p2`, `p3`, `cc`) uses an `entrypoint.sh` that typically launches `/bin/bash`. This keeps the container running and prevents Kathara from potentially terminating it immediately after the main process (like `python main.py`) might finish or if started as a background task within the `.startup` script. The actual application (`python main.py`) is intended to be launched by the `.startup` script or manually.
-* **Startup Reliability**: Script execution via `.startup` can sometimes be inconsistent depending on timing or environment factors within Kathara. Manual execution or checking `docker logs` is often necessary.
+### Kathará Specific Notes:
+* **Entrypoint Workaround**: Each service (`p1`, `p2`, `p3`, `cc`) uses an `entrypoint.sh` that typically launches `/bin/bash`. This keeps the container running and prevents Kathará from potentially terminating it immediately after the main process (like `python main.py`) might finish or if started as a background task within the `.startup` script. The actual application (`python main.py`) is intended to be launched by the `.startup` script or manually.
+* **Startup Reliability**: Script execution via `.startup` can sometimes be inconsistent depending on timing or environment factors within Kathará. Manual execution or checking `docker logs` is often necessary.
 
 ## 🏗️ Project Structure
 
 ```
 .
 ├── cc.startup          # Startup script for the Control Center container
-├── lab.conf            # Kathara lab configuration (topology, devices)
+├── lab.conf            # Kathará lab configuration (topology, devices)
 ├── mqtt.startup        # Startup script for the MQTT Broker container
 ├── p1.startup          # Startup script for Production Line 1
 ├── p2.startup          # Startup script for Production Line 2
 ├── p3.startup          # Startup script for Production Line 3
 ├── readme.md           # This file
 ├── rtr.startup         # Startup script for the Router container
-├── shared/             # Directory mounted into containers (if needed by Kathara config)
+├── shared/             # Directory mounted into containers (if needed by Kathará config)
 └── src/                # Source code for the simulation components
     ├── compose.yml     # Docker Compose file (used for building images)
     ├── control-center/ # Central monitoring system logic
     │   ├── Dockerfile
-    │   ├── entrypoint.sh # Keeps container alive for Kathara
+    │   ├── entrypoint.sh # Keeps container alive for Kathará
     │   ├── main.py       # Real-time analysis logic
     │   └── requirements.txt
     ├── publisher1/     # Production Line 1 simulator
@@ -144,10 +144,10 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 * **Alert Logic**: Processes incoming data and triggers alerts based on predefined rules.
 
 #### 3. MQTT Broker (mqtt)
-* Typically the standard `eclipse-mosquitto` image, configured via `mqtt.startup` or a custom config file mounted by Kathara. Handles message queuing and delivery.
+* Typically the standard `eclipse-mosquitto` image, configured via `mqtt.startup` or a custom config file mounted by Kathará. Handles message queuing and delivery.
 
 #### 4. Router (rtr)
-* A simple container (e.g., based on Alpine or FRR) configured by Kathara (`rtr.startup`) to route traffic between different network segments defined in `lab.conf`.
+* A simple container (e.g., based on Alpine or FRR) configured by Kathará (`rtr.startup`) to route traffic between different network segments defined in `lab.conf`.
 
 ### 📦 Payload Strategy
 
@@ -163,7 +163,7 @@ This simulator aims to generate data reflecting real-world industrial conditions
 
 #### 1.  **VibrationSensor** (Predictive Maintenance)
 
-* **Reference Standard**: Based on principles similar to [ISO 10816-3](https://www.iso.org/standard/45674.html) (Vibrations in industrial machinery).
+* **Reference Standard**: Based on principles similar to [ISO 10816-3](https://www.iso.org/standard/78311.html) (Vibrations in industrial machinery).
 * **Simulated Data Points**:
     ```python
      {
@@ -182,7 +182,7 @@ This simulator aims to generate data reflecting real-world industrial conditions
 
 #### 2.  **TemperatureSensor** (Thermal Management)
 
-* **Reference Standard**: Relevant to principles in [ISO 13732-1](https://www.iso.org/standard/51567.html) (Thermal contact safety).
+* **Reference Standard**: Relevant to principles in [ISO 13732-1](https://www.iso.org/standard/43558.html) (Thermal contact safety).
 * **Simulated Data Points**:
     ```python
      {
@@ -217,7 +217,7 @@ This simulator aims to generate data reflecting real-world industrial conditions
 
 ---
 
-## 🛠️ Customization in Kathara Environment
+## 🛠️ Customization in Kathará Environment
 
 ### 🔧 **Customizing Sensor Parameters**
 1.  Modify the desired JSON configuration file (e.g., `src/publisher1/line1.json`) within your project directory. Change intervals, payload sizes, or QoS levels.
@@ -225,19 +225,19 @@ This simulator aims to generate data reflecting real-world industrial conditions
     ```bash
     docker compose -f src/compose.yml build publisher1 # Or the specific service
     ```
-3.  Restart the Kathara lab:
+3.  Restart the Kathará lab:
     ```bash
-    sudo kathara lstop # Stop the currently running lab
-    sudo kathara lstart
+    sudo Kathara lclean # Stop the currently running lab
+    sudo Kathara lstart
     ```
 
 ### 🏭 **Adding a New Production Line (e.g., Line 4)**
 1.  **Create Source Files**: Duplicate an existing publisher directory (e.g., copy `src/publisher1` to `src/publisher4`).
 2.  **Configure Line 4**: Create/modify `src/publisher4/line4.json` with the desired `line_id` and sensor configuration.
 3.  **Update Docker Build**: Add a service definition for `production-line-4` in `src/compose.yml` pointing to the `src/publisher4` directory and its Dockerfile.
-4.  **Update Kathara Config**:
+4.  **Update Kathará Config**:
     * Add the new device (e.g., `p4`) to `lab.conf`, connecting it to the appropriate network(s).
-    * Specify the Docker image to use for `p4` (e.g., `your_dockerhub_user/kathara-iiot-p4:latest` or the locally built image name).
+    * Specify the Docker image to use for `p4` (e.g., `your_dockerhub_user/Kathara-iiot-p4:latest` or the locally built image name).
     * Create a `p4.startup` script to launch the application inside the container.
 5.  **Build the New Image**:
     ```bash
@@ -245,20 +245,20 @@ This simulator aims to generate data reflecting real-world industrial conditions
     ```
 6.  **Launch the Updated Lab**:
     ```bash
-    sudo kathara lstart
+    sudo Kathara lstart
     ```
 
 ### Other Modifications
 * **Custom Alert Rules**: Modify `src/control-center/main.py` and rebuild/restart `cc`.
 * **New Sensor Types**: Create new Python classes in `src/publisherX/sensors/`, register them, update JSON configs, rebuild images, and restart the lab.
-* **Network Topology**: Modify `lab.conf` to change connections, add routers, or introduce network impairments (if using Kathara's advanced features).
+* **Network Topology**: Modify `lab.conf` to change connections, add routers, or introduce network impairments (if using Kathará's advanced features).
 
 ---
 
 ## 🏭 Conclusion: IIoT Simulation in a Network Context
 
-This Kathara-adapted simulator provides a powerful environment for:
+This Kathará-adapted simulator provides a powerful environment for:
 * Testing IIoT architectures within realistic or complex network topologies.
-* Analyzing the impact of network conditions (latency, packet loss - if simulated via Kathara) on MQTT communication.
+* Analyzing the impact of network conditions (latency, packet loss - if simulated via Kathará) on MQTT communication.
 * Developing and validating network security policies for IIoT systems.
 * Training cybersecurity and network professionals on IIoT scenarios.
