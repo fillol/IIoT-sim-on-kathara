@@ -1,12 +1,11 @@
-# Industrial IoT Simulator on Kathará
-
 ![Industry 4.0](https://img.shields.io/badge/-Industry%204.0-4CAF50?logo=industry&logoColor=FFFF00)
 ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=ffd343)
 ![MQTT](https://img.shields.io/badge/-MQTT-660099?logo=mosquitto&logoColor=white)
 ![Docker](https://img.shields.io/badge/-Docker-2496ED?logo=docker&logoColor=white)
-![Kathará](https://img.shields.io/badge/-Kathara-blue?logo=linux&logoColor=white) ![GitHub License](https://img.shields.io/badge/License-MIT-ff69b4)
+![Kathará](https://img.shields.io/badge/-Kathara-blue?logo=linux&logoColor=white) 
+![GitHub License](https://img.shields.io/badge/License-MIT-ff69b4)
 
-This project ports the original [Industrial IoT Simulator](https://github.com/fillol/IIoT-simulator) to run within the [Kathara](https://github.com/KatharaFramework/Kathara) network simulation environment. It allows simulating an Industrial IoT (IIoT) setup using Docker containers orchestrated by Kathará, providing a flexible platform for testing network interactions, security postures, and data flow patterns in complex IIoT scenarios.
+This project ports the original [Industrial IoT Simulator](https://github.com/fillol/IIoT-simulator) to run within the [Kathará](https://github.com/KatharaFramework/Kathara) network simulation environment. It allows simulating an Industrial IoT (IIoT) setup using Docker containers orchestrated by Kathará, providing a flexible platform for testing network interactions, security postures, and data flow patterns in complex IIoT scenarios.
 
 ## 📜 How it Works
 This simulator emulates three production lines (pressing, welding, painting) with virtual sensors compliant with Industry 4.0 standards. It generates realistic data (vibration, temperature, quality) transmitted via MQTT over a Kathará-managed network to a central control center with predictive alert logic.
@@ -113,35 +112,35 @@ This simulator emulates three production lines (pressing, welding, painting) wit
     └── publisher3/     # Production Line 3 simulator (similar structure)
         ├── ...
         └── line3.json
-
-# Note: MQTT Broker (Mosquitto) is likely pulled as a standard image via lab.conf, not built from src/.
 ```
+
+> **Note:** MQTT Broker (Mosquitto) is likely pulled as a standard image via lab.conf, not built from src/.
 
 ## 🔍 Composition:
 
 ### 🐳 Key Actors:
 
 #### 1. Production Lines (p1, p2, p3)
-* **Implementation**: Python scripts (`src/publisherX/main.py`) using sensor classes (`src/publisherX/sensors/`).
-* **Configuration**: Defined in JSON files (`src/publisherX/lineX.json`). Example (`src/publisher1/line1.json`):
+* **Implementation:** Python scripts (`src/publisherX/main.py`) using sensor classes (`src/publisherX/sensors/`).
+* **Configuration:** Defined in JSON files (`src/publisherX/lineX.json`). Example (`src/publisher1/line1.json`):
     ```json
-     {
-       "line_id": "PRESS-LINE-1",
-       "sensors": [
-         {
-           "type": "vibration",
-           "interval": 0.5,
-           "payload": "small",
-           "qos": 2
-         }
-       ]
-     }
+    {
+      "line_id": "PRESS-LINE-1",
+      "sensors": [
+        {
+          "type": "vibration",
+          "interval": 0.5,
+          "payload": "small",
+          "qos": 2
+        }
+      ]
+    }
     ```
-* **Data Generation**: Simulates Vibration, Temperature, and Quality sensors based on industrial standards.
+* **Data Generation:** Simulates Vibration, Temperature, and Quality sensors based on industrial standards.
 
 #### 2. Control Center (cc)
-* **Subscription**: Monitors MQTT topics (e.g., `factory/#`). Logic in `src/control-center/main.py`.
-* **Alert Logic**: Processes incoming data and triggers alerts based on predefined rules.
+* **Subscription:** Monitors MQTT topics (e.g., `factory/#`). Logic in `src/control-center/main.py`.
+* **Alert Logic:** Processes incoming data and triggers alerts based on predefined rules.
 
 #### 3. MQTT Broker (mqtt)
 * Typically the standard `eclipse-mosquitto` image, configured via `mqtt.startup` or a custom config file mounted by Kathará. Handles message queuing and delivery.
@@ -151,107 +150,151 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 
 ### 📦 Payload Strategy
 
-| Category  | Size          | Frequency | Use Case             | Example Line   |
-| :-------- | :------------ | :-------- | :------------------- | :------------- |
-| **Small** | 1-10 KB       | 0.5-2 sec | Real-time monitoring | PRESS-LINE-1   |
-| **Medium**| 10-100 KB     | 2-5 sec   | Historical trends    | WELDING-LINE-2 |
-| **Large** | 100 KB - 1 MB | 5-10 sec  | Big Data/Analytics   | PAINT-LINE-3   |
+| Category   | Size          | Frequency | Use Case             | Example Line   |
+| :--------- | :------------ | :-------- | :------------------- | :------------- |
+| **Small**  | 1-10 KB       | 0.5-2 sec | Real-time monitoring | PRESS-LINE-1   |
+| **Medium** | 10-100 KB     | 2-5 sec   | Historical trends    | WELDING-LINE-2 |
+| **Large**  | 100 KB - 1 MB | 5-10 sec  | Big Data/Analytics   | PAINT-LINE-3   |
 
 ### 🔬 Realistic Industrial Metrics
 
 This simulator aims to generate data reflecting real-world industrial conditions. The following sensor configurations provide a baseline.
 
-#### 1.  **VibrationSensor** (Predictive Maintenance)
+#### 1. **VibrationSensor** (Predictive Maintenance)
 
-* **Reference Standard**: Based on principles similar to [ISO 10816-3](https://www.iso.org/standard/78311.html) (Vibrations in industrial machinery).
-* **Simulated Data Points**:
+* **Reference Standard:** Based on principles similar to [ISO 10816-3](https://www.iso.org/standard/78311.html) (Vibrations in industrial machinery).
+* **Simulated Data Points:**
     ```python
-     {
-       "x": random.uniform(2.0, 15.0),  # Simulated RMS Velocity [mm/s] or Acceleration [m/s²]
-       "fft": [random.random() for _ in range(100)], # Simulated frequency components
-       "metadata": {
-         "samples": size//1000 # Abstract representation
-       }
-     }
+    {
+      "x": random.uniform(2.0, 15.0),  # Simulated RMS Velocity [mm/s] or Acceleration [m/s²]
+      "fft": [random.random() for _ in range(100)],  # Simulated frequency components
+      "metadata": {
+         "samples": size//1000  # Abstract representation
+      }
+    }
     ```
-* **Simulator Default Configuration**: Examples use a **2 Hz** reporting frequency with a **"small" (1-10 KB)** payload, including FFT data.
-* **Real-World Context**: Industrial predictive maintenance often employs high sampling rates (e.g., kHz range, like 10-20 kHz) to capture detailed vibration signatures for effective FFT analysis, especially for bearing faults. The simulator's 2 Hz default frequency is lower than typical *sampling* rates but could represent the reporting interval for *processed* data. Raw high-frequency data or detailed FFT results could potentially exceed the "small" payload category.
-* **Simulated Alarm Thresholds** (Example logic in Control Center):
-    * Warning: >8 (unit depends on metric, e.g., mm/s)
-    * Critical: >15 (unit depends on metric, e.g., mm/s)
+* **Simulator Default Configuration:** Examples use a **2 Hz** reporting frequency with a **"small" (1-10 KB)** payload, including FFT data.
+* **Real-World Context:** Industrial predictive maintenance often employs high sampling rates (e.g., kHz range, like 10-20 kHz) to capture detailed vibration signatures for effective FFT analysis, especially for bearing faults. The simulator's 2 Hz default frequency represents a reporting interval for processed data.
+* **Simulated Alarm Thresholds (Example logic):**
+    * Warning: >8 (unit depends on metric)
+    * Critical: >15 (unit depends on metric)
 
-#### 2.  **TemperatureSensor** (Thermal Management)
+#### 2. **TemperatureSensor** (Thermal Management)
 
-* **Reference Standard**: Relevant to principles in [ISO 13732-1](https://www.iso.org/standard/43558.html) (Thermal contact safety).
-* **Simulated Data Points**:
+* **Reference Standard:** Relevant to principles in [ISO 13732-1](https://www.iso.org/standard/43558.html) (Thermal contact safety).
+* **Simulated Data Points:**
     ```python
-     {
-       "motor_temp": random.uniform(30.0, 90.0),  # °C
-       "bearing_temp": random.normalvariate(60.0, 5.0), # °C
-       "trend": [...] # Simulated recent data points
-     }
+    {
+      "motor_temp": random.uniform(30.0, 90.0),  # °C
+      "bearing_temp": random.normalvariate(60.0, 5.0),  # °C
+      "trend": [...]  # Simulated recent data points
+    }
     ```
-* **Simulator Default Configuration**: Implied frequencies range from **0.1 Hz (10s interval) to 2 Hz (0.5s interval)** based on payload strategy.
-* **Real-World Context**: Real-world reporting intervals for temperature vary widely based on the application, from seconds for critical processes to minutes or longer for general monitoring. The simulator's implied range is plausible for many industrial scenarios. Configurability is important to match specific thermal dynamics.
-* **Simulated Critical Thresholds** (Example logic in Control Center):
+* **Simulator Default Configuration:** Implied frequencies range from **0.1 Hz (10s interval) to 2 Hz (0.5s interval)**.
+* **Real-World Context:** Temperature reporting intervals vary by application, from seconds for critical processes to minutes for general monitoring. The simulator’s configuration is plausible and can be customized to reflect specific thermal dynamics.
+* **Simulated Critical Thresholds (Example logic):**
     * Motor: >85°C
     * Bearings: >70°C
 
-#### 3.  **QualitySensor** (Quality Control 4.0)
+#### 3. **QualitySensor** (Quality Control 4.0)
 
-* **AI-driven Metrics Concept**: Simulates output from an AI-based quality control system.
-* **Simulated Data Points**:
+* **AI-driven Metrics Concept:** Simulates output from an AI-based quality control system.
+* **Simulated Data Points:**
     ```python
-     {
-       "defect_count": random.randint(0, 5),
-       "image_meta": {
+    {
+      "defect_count": random.randint(0, 5),
+      "image_meta": {
          "size_kb": target_size//1024,
          "defect_coordinates": [...],
-         "image_hash": "..." # Simulated hash/identifier
-       }
-     }
+         "image_hash": "..."  # Simulated hash/identifier
+      }
+    }
     ```
-* **Simulator Default Configuration**: Examples use a **0.1 Hz (10s interval)** frequency with a **"large" (100 KB - 1 MB)** payload, associated with a "simulated image hash".
-* **Real-World Context**: Data rates for visual inspection vary greatly. High-speed lines may require high frame rates, generating significant data volumes. Edge processing (analyzing images locally and sending results/hashes/defective images) is common to manage data. The simulator's 10s interval might fit some inspection stages, but could be too slow for others. The large payload for a "hash" likely represents an abstraction of more detailed analysis results or compressed data rather than just a simple hash.
-* **Simulated Alert**: >3 defects/batch (Example logic in Control Center)
+* **Simulator Default Configuration:** Examples use a **0.1 Hz (10s interval)** frequency with a **"large" (100 KB - 1 MB)** payload.
+* **Real-World Context:** Visual inspection data volumes vary, and edge processing is used to reduce transmitted data. The simulator's configuration abstracts detailed image analysis by using a large payload for a processed "image hash."
+* **Simulated Alert (Example logic):** More than 3 defects per batch triggers an alert.
+
+---
+
+## 📚 Supporting Sources
+
+To reinforce the design choices of the simulator, the following reputable sources provide positive validation for each sensor type:
+
+### 1. Vibration Sensors
+- **TE Connectivity – Predictive Maintenance with Vibration Sensors**  
+  Demonstrates how high-frequency sensors can provide actionable data for predictive maintenance.  
+  [Predictive Maintenance with Vibration Sensors](https://www.te.com/en/whitepapers/sensors/predictive-maintenance-with-vibration-sensors.html)
+
+- **CBM Connect – Simplified Vibration Monitoring: ISO 10816‑3 Guidelines**  
+  Offers guidelines on vibration monitoring based on ISO 10816‑3, reinforcing the importance of realistic sensor parameters.  
+  [Simplified Vibration Monitoring: ISO 10816‑3 Guidelines](https://www.cbmconnect.com/simplified-vibration-monitoring-iso-10816-3-guidelines/)
+
+- **EEWeb – Sensors in Industry 4.0: Vibration Monitoring**  
+  Provides an extensive overview of the technologies behind industrial vibration sensors within the Industry 4.0 framework.  
+  [Sensors in Industry 4.0: Vibration Monitoring](https://www.eeweb.com/sensors-in-industry-4-0-vibration-monitoring/)
+
+### 2. Temperature Sensors
+- **Phase IV Engineering – Wireless Motor Sensor for Predictive Maintenance**  
+  Highlights the importance of thermal monitoring for preventive maintenance, even with adjustable reporting intervals.  
+  [Wireless Motor Sensor for Predictive Maintenance](https://www.phaseivengr.com/product/sensors/temperature/wireless-motor-sensor-predictive-maintenance/)
+
+- **NCD Store – Smart Industrial IoT Wireless Vibration Temperature Sensor**  
+  Demonstrates the integration of temperature measurement in multi-sensor IoT devices, supporting the simulator’s approach.  
+  [Smart Industrial IoT Wireless Vibration Temperature Sensor](https://store.ncd.io/product/smart-industrial-iot-wireless-vibration-temperature-sensor/)
+
+- **ISO 13732 Standard**  
+  While not a direct web link, this internationally recognized standard provides reliable criteria for thermal monitoring, supporting the sensor configuration.
+
+### 3. Quality Control Sensors (with AI-driven Image Analysis)
+- **IMechE – How Condition Monitoring Led the Way to Industry 4.0**  
+  Discusses the evolution of monitoring systems in industrial settings, including AI-driven quality analysis.  
+  [How Condition Monitoring Led the Way to Industry 4.0](https://www.imeche.org/news/news-article/how-condition-monitoring-led-the-way-to-industry-4-0)
+
+- **Maintenance and Engineering – Vibration Monitoring: A Case Study**  
+  Presents case studies where advanced monitoring techniques, including image analysis, have improved process reliability.  
+  [Vibration Monitoring: A Case Study](https://www.maintenanceandengineering.com/2014/01/01/vibration-monitoring-a-case-study/)
+
+- **Analog Devices – Choosing the Best Vibration Sensor for Wind Turbine Condition Monitoring**  
+  Exemplifies the use of advanced sensor technologies and data processing, including image-based methods, in modern industrial applications.  
+  [Choosing the Best Vibration Sensor for Wind Turbine Condition Monitoring](https://www.analog.com/en/resources/analog-dialogue/articles/choosing-the-best-vibration-sensor-for-wind-turbine-condition-monitoring.html)
 
 ---
 
 ## 🛠️ Customization in Kathará Environment
 
-### 🔧 **Customizing Sensor Parameters**
+### 🔧 Customizing Sensor Parameters
 1.  Modify the desired JSON configuration file (e.g., `src/publisher1/line1.json`) within your project directory. Change intervals, payload sizes, or QoS levels.
-2.  Rebuild the specific Docker image if changes require it (though often JSON changes don't require a rebuild if mounted correctly, check your `.startup` and `lab.conf`). If unsure, rebuild:
+2.  Rebuild the specific Docker image if required (often JSON changes do not require a rebuild if mounted correctly, but check your `.startup` and `lab.conf`). If unsure, rebuild:
     ```bash
-    docker compose -f src/compose.yml build publisher1 # Or the specific service
+    docker compose -f src/compose.yml build publisher1  # Or the specific service
     ```
 3.  Restart the Kathará lab:
     ```bash
-    sudo Kathara lclean # Stop the currently running lab
+    sudo Kathara lclean  # Stop the currently running lab
     sudo Kathara lstart
     ```
 
-### 🏭 **Adding a New Production Line (e.g., Line 4)**
-1.  **Create Source Files**: Duplicate an existing publisher directory (e.g., copy `src/publisher1` to `src/publisher4`).
-2.  **Configure Line 4**: Create/modify `src/publisher4/line4.json` with the desired `line_id` and sensor configuration.
-3.  **Update Docker Build**: Add a service definition for `production-line-4` in `src/compose.yml` pointing to the `src/publisher4` directory and its Dockerfile.
-4.  **Update Kathará Config**:
-    * Add the new device (e.g., `p4`) to `lab.conf`, connecting it to the appropriate network(s).
-    * Specify the Docker image to use for `p4` (e.g., `your_dockerhub_user/Kathara-iiot-p4:latest` or the locally built image name).
-    * Create a `p4.startup` script to launch the application inside the container.
-5.  **Build the New Image**:
+### 🏭 Adding a New Production Line (e.g., Line 4)
+1.  **Create Source Files:** Duplicate an existing publisher directory (e.g., copy `src/publisher1` to `src/publisher4`).
+2.  **Configure Line 4:** Create/modify `src/publisher4/line4.json` with the desired `line_id` and sensor configuration.
+3.  **Update Docker Build:** Add a service definition for `production-line-4` in `src/compose.yml` pointing to the `src/publisher4` directory and its Dockerfile.
+4.  **Update Kathará Config:**
+    - Add the new device (e.g., `p4`) to `lab.conf`, connecting it to the appropriate network(s).
+    - Specify the Docker image to use for `p4` (e.g., `your_dockerhub_user/Kathara-iiot-p4:latest` or the locally built image name).
+    - Create a `p4.startup` script to launch the application inside the container.
+5.  **Build the New Image:**
     ```bash
-    docker compose -f src/compose.yml build production-line-4 # Use the service name from compose.yml
+    docker compose -f src/compose.yml build production-line-4  # Use the service name from compose.yml
     ```
-6.  **Launch the Updated Lab**:
+6.  **Launch the Updated Lab:**
     ```bash
     sudo Kathara lstart
     ```
 
 ### Other Modifications
-* **Custom Alert Rules**: Modify `src/control-center/main.py` and rebuild/restart `cc`.
-* **New Sensor Types**: Create new Python classes in `src/publisherX/sensors/`, register them, update JSON configs, rebuild images, and restart the lab.
-* **Network Topology**: Modify `lab.conf` to change connections, add routers, or introduce network impairments (if using Kathará's advanced features).
+* **Custom Alert Rules:** Modify `src/control-center/main.py` and rebuild/restart `cc`.
+* **New Sensor Types:** Create new Python classes in `src/publisherX/sensors/`, register them, update JSON configs, rebuild images, and restart the lab.
+* **Network Topology:** Modify `lab.conf` to change connections, add routers, or introduce network impairments (using Kathará's advanced features).
 
 ---
 
@@ -259,6 +302,6 @@ This simulator aims to generate data reflecting real-world industrial conditions
 
 This Kathará-adapted simulator provides a powerful environment for:
 * Testing IIoT architectures within realistic or complex network topologies.
-* Analyzing the impact of network conditions (latency, packet loss - if simulated via Kathará) on MQTT communication.
+* Analyzing the impact of network conditions (latency, packet loss—if simulated via Kathará) on MQTT communication.
 * Developing and validating network security policies for IIoT systems.
 * Training cybersecurity and network professionals on IIoT scenarios.
