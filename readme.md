@@ -5,6 +5,8 @@
 ![Kathará](https://img.shields.io/badge/-Kathara-blue?logo=linux&logoColor=white) 
 ![GitHub License](https://img.shields.io/badge/License-MIT-ff69b4)
 
+# Industrial IoT Simulator on Kathará
+
 This project ports the original [Industrial IoT Simulator](https://github.com/fillol/IIoT-simulator) to run within the [Kathará](https://github.com/KatharaFramework/Kathara) network simulation environment. It allows simulating an Industrial IoT (IIoT) setup using Docker containers orchestrated by Kathará, providing a flexible platform for testing network interactions, security postures, and data flow patterns in complex IIoT scenarios.
 
 ## 📜 How it Works
@@ -156,7 +158,9 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 | **Medium** | 10-100 KB     | 2-5 sec   | Historical trends    | WELDING-LINE-2 |
 | **Large**  | 100 KB - 1 MB | 5-10 sec  | Big Data/Analytics   | PAINT-LINE-3   |
 
-### 🔬 Realistic Industrial Metrics
+---
+
+## 🔬 Realistic Industrial Metrics
 
 This simulator aims to generate data reflecting real-world industrial conditions. The following sensor configurations provide a baseline.
 
@@ -214,49 +218,39 @@ This simulator aims to generate data reflecting real-world industrial conditions
 * **Real-World Context:** Visual inspection data volumes vary, and edge processing is used to reduce transmitted data. The simulator's configuration abstracts detailed image analysis by using a large payload for a processed "image hash."
 * **Simulated Alert (Example logic):** More than 3 defects per batch triggers an alert.
 
----
-
-## 📚 Supporting Sources
+### 📚 Supporting Sources
 
 To reinforce the design choices of the simulator, the following reputable sources provide positive validation for each sensor type:
 
-### 1. Vibration Sensors
-- **TE Connectivity – Predictive Maintenance with Vibration Sensors**  
+#### 1. Vibration Sensors
+- **TE Connectivity – [Predictive Maintenance with Vibration Sensors](https://www.te.com/en/whitepapers/sensors/predictive-maintenance-with-vibration-sensors.html)**  
   Demonstrates how high-frequency sensors can provide actionable data for predictive maintenance.  
-  [Predictive Maintenance with Vibration Sensors](https://www.te.com/en/whitepapers/sensors/predictive-maintenance-with-vibration-sensors.html)
 
-- **CBM Connect – Simplified Vibration Monitoring: ISO 10816‑3 Guidelines**  
+- **CBM Connect – [Simplified Vibration Monitoring: ISO 10816‑3 Guidelines](https://www.cbmconnect.com/simplified-vibration-monitoring-iso-10816-3-guidelines/)**  
   Offers guidelines on vibration monitoring based on ISO 10816‑3, reinforcing the importance of realistic sensor parameters.  
-  [Simplified Vibration Monitoring: ISO 10816‑3 Guidelines](https://www.cbmconnect.com/simplified-vibration-monitoring-iso-10816-3-guidelines/)
 
-- **EEWeb – Sensors in Industry 4.0: Vibration Monitoring**  
+- **EEWeb – [Sensors in Industry 4.0: Vibration Monitoring](https://www.eeweb.com/sensors-in-industry-4-0-vibration-monitoring/)**  
   Provides an extensive overview of the technologies behind industrial vibration sensors within the Industry 4.0 framework.  
-  [Sensors in Industry 4.0: Vibration Monitoring](https://www.eeweb.com/sensors-in-industry-4-0-vibration-monitoring/)
 
-### 2. Temperature Sensors
-- **Phase IV Engineering – Wireless Motor Sensor for Predictive Maintenance**  
+#### 2. Temperature Sensors
+- **Phase IV Engineering – [Wireless Motor Sensor for Predictive Maintenance](https://www.phaseivengr.com/product/sensors/temperature/wireless-motor-sensor-predictive-maintenance/)**  
   Highlights the importance of thermal monitoring for preventive maintenance, even with adjustable reporting intervals.  
-  [Wireless Motor Sensor for Predictive Maintenance](https://www.phaseivengr.com/product/sensors/temperature/wireless-motor-sensor-predictive-maintenance/)
 
-- **NCD Store – Smart Industrial IoT Wireless Vibration Temperature Sensor**  
-  Demonstrates the integration of temperature measurement in multi-sensor IoT devices, supporting the simulator’s approach.  
-  [Smart Industrial IoT Wireless Vibration Temperature Sensor](https://store.ncd.io/product/smart-industrial-iot-wireless-vibration-temperature-sensor/)
+- **NCD Store – [Smart Industrial IoT Wireless Vibration Temperature Sensor](https://store.ncd.io/product/smart-industrial-iot-wireless-vibration-temperature-sensor/)**  
+  Demonstrates the integration of temperature measurement in multi-sensor IoT devices, supporting the simulator’s approach.
 
-- **ISO 13732 Standard**  
-  While not a direct web link, this internationally recognized standard provides reliable criteria for thermal monitoring, supporting the sensor configuration.
+- **Standard - [ISO 13732](https://www.iso.org/standard/43558.html)**  
+  This internationally recognized standard provides reliable criteria for thermal monitoring, supporting the sensor configuration.
 
-### 3. Quality Control Sensors (with AI-driven Image Analysis)
-- **IMechE – How Condition Monitoring Led the Way to Industry 4.0**  
-  Discusses the evolution of monitoring systems in industrial settings, including AI-driven quality analysis.  
-  [How Condition Monitoring Led the Way to Industry 4.0](https://www.imeche.org/news/news-article/how-condition-monitoring-led-the-way-to-industry-4-0)
+#### 3. Quality Control Sensors (with AI-driven Image Analysis)
+- **IMechE – [How Condition Monitoring Led the Way to Industry 4.0](https://www.imeche.org/news/news-article/how-condition-monitoring-led-the-way-to-industry-4-0)**  
+  Discusses the evolution of monitoring systems in industrial settings, including AI-driven quality analysis.
 
-- **Maintenance and Engineering – Vibration Monitoring: A Case Study**  
-  Presents case studies where advanced monitoring techniques, including image analysis, have improved process reliability.  
-  [Vibration Monitoring: A Case Study](https://www.maintenanceandengineering.com/2014/01/01/vibration-monitoring-a-case-study/)
+- **Maintenance and Engineering – [Vibration Monitoring: A Case Study](https://www.maintenanceandengineering.com/2014/01/01/vibration-monitoring-a-case-study/)**  
+  Presents case studies where advanced monitoring techniques, including image analysis, have improved process reliability.
 
-- **Analog Devices – Choosing the Best Vibration Sensor for Wind Turbine Condition Monitoring**  
-  Exemplifies the use of advanced sensor technologies and data processing, including image-based methods, in modern industrial applications.  
-  [Choosing the Best Vibration Sensor for Wind Turbine Condition Monitoring](https://www.analog.com/en/resources/analog-dialogue/articles/choosing-the-best-vibration-sensor-for-wind-turbine-condition-monitoring.html)
+- **Analog Devices – [Choosing the Best Vibration Sensor for Wind Turbine Condition Monitoring](https://www.analog.com/en/resources/analog-dialogue/articles/choosing-the-best-vibration-sensor-for-wind-turbine-condition-monitoring.html)**  
+  Exemplifies the use of advanced sensor technologies and data processing, including image-based methods, in modern industrial applications.
 
 ---
 
