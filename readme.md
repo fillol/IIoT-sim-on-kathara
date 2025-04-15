@@ -34,8 +34,8 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/fillol/IIoT-sim-on-Kathará.git
-    cd IIoT-sim-on-Kathará
+    git clone https://github.com/fillol/IIoT-sim-on-Kathara.git
+    cd IIoT-sim-on-Kathara
     ```
 
 2.  **Build the Docker Images:**
@@ -46,10 +46,10 @@ This simulator emulates three production lines (pressing, welding, painting) wit
     ```
 
 3.  **Launch the Kathará Lab:**
-    Use the `Kathara lstart` command to start the network simulation environment defined in `lab.conf`.
+    Use the `lstart` command to start the network simulation environment defined in `lab.conf`.
     *Important:* This often requires `sudo` permissions.
     ```bash
-    sudo Kathara lstart
+    sudo kathara lstart
     ```
     This command will:
     * Read `lab.conf` to understand the network topology and devices (p1, p2, p3, cc, mqtt, rtr).
@@ -62,8 +62,8 @@ This simulator emulates three production lines (pressing, welding, painting) wit
     * **Docker Logs**: The primary way to see the simulator's output (sensor data, control center messages) is via `docker logs`. The container names are typically defined in `lab.conf` (e.g., `p1`, `p2`, `p3`, `cc`, `mqtt`).
         ```bash
         # Example: View logs for production line 1 and the control center
-        docker logs p1 -f
-        docker logs cc -f
+        docker logs -f p1
+        docker logs -f cc
         ```
     * **Manual Execution (If Needed)**: Sometimes, the main scripts might not start automatically within the Kathará environment. If you don't see output in `docker logs` after a short while, you may need to manually start them in the respective Kathará terminals:
         * In the `p1` terminal: `python main.py`
@@ -220,7 +220,7 @@ This simulator aims to generate data reflecting real-world industrial conditions
 
 ### 📚 Supporting Sources
 
-To reinforce the design choices of the simulator, the following reputable sources provide positive validation for each sensor type:
+To reinforce the design choices of the simulator, the following reputable sources provide validation for each sensor type:
 
 #### 1. Vibration Sensors
 - **TE Connectivity – [Predictive Maintenance with Vibration Sensors](https://www.te.com/en/whitepapers/sensors/predictive-maintenance-with-vibration-sensors.html)**  
@@ -264,8 +264,8 @@ To reinforce the design choices of the simulator, the following reputable source
     ```
 3.  Restart the Kathará lab:
     ```bash
-    sudo Kathara lclean  # Stop the currently running lab
-    sudo Kathara lstart
+    sudo kathara lclean  # Stop the currently running lab
+    sudo kathara lstart
     ```
 
 ### 🏭 Adding a New Production Line (e.g., Line 4)
@@ -282,7 +282,7 @@ To reinforce the design choices of the simulator, the following reputable source
     ```
 6.  **Launch the Updated Lab:**
     ```bash
-    sudo Kathara lstart
+    sudo kathara lstart
     ```
 
 ### Other Modifications
