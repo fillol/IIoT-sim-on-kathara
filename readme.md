@@ -242,7 +242,7 @@ To reinforce the design choices of the simulator, the following reputable source
 - **Standard - [ISO 13732](https://www.iso.org/standard/43558.html)**  
   This internationally recognized standard provides reliable criteria for thermal monitoring, supporting the sensor configuration.
 
-#### 3. Quality Control Sensors (with AI-driven Image Analysis)
+#### 3. Quality Control Sensor
 - **IMechE – [How Condition Monitoring Led the Way to Industry 4.0](https://www.imeche.org/news/news-article/how-condition-monitoring-led-the-way-to-industry-4-0)**  
   Discusses the evolution of monitoring systems in industrial settings, including AI-driven quality analysis.
 
