@@ -41,7 +41,7 @@ class ProductionLine:
     async def run(self):
         # Inizializza il client MQTT DENTRO il contesto asincrono
         async with MqttClient(
-            hostname="10.0.5.2",
+            hostname="10.0.0.2",
             client_id=self.config["line_id"]
         ) as client:
             tasks = []

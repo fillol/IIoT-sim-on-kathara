@@ -5,12 +5,18 @@
             "type": "vibration",
             "interval": 0.5,
             "payload": "small",
-            "qos": 2
+            "qos": 1
         },
         {
             "type": "temperature",
             "interval": 2.0,
             "payload": "medium",
+            "qos": 1
+        },
+        {
+            "type": "security",
+            "interval": 5.0,
+            "payload": "small",
             "qos": 1
         }
     ]

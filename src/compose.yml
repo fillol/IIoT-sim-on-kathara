@@ -10,3 +10,6 @@ services:
 
   production-line-3:
     build: ./publisher3
+
+  encrypter:
+    build: ./encrypter

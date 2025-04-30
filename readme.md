@@ -81,6 +81,7 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 ```
 .
 ├── cc.startup          # Startup script for the Control Center container
+├── en.startup          # Startup script for Encrypter
 ├── lab.conf            # Kathará lab configuration (topology, devices)
 ├── mqtt.startup        # Startup script for the MQTT Broker container
 ├── p1.startup          # Startup script for Production Line 1
@@ -91,11 +92,12 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 ├── shared/             # Directory mounted into containers (if needed by Kathará config)
 └── src/                # Source code for the simulation components
     ├── compose.yml     # Docker Compose file (used for building images)
-    ├── control-center/ # Central monitoring system logic
+    ├── control-center/ # Central monitoring system logic (and decrypter)
     │   ├── Dockerfile
     │   ├── entrypoint.sh # Keeps container alive for Kathará
     │   ├── main.py       # Real-time analysis logic
     │   └── requirements.txt
+    ├── encrypter/      # Encryption Service (Secure Sensor)
     ├── publisher1/     # Production Line 1 simulator
     │   ├── Dockerfile
     │   ├── entrypoint.sh
@@ -251,6 +253,34 @@ To reinforce the design choices of the simulator, the following reputable source
 
 - **Analog Devices – [Choosing the Best Vibration Sensor for Wind Turbine Condition Monitoring](https://www.analog.com/en/resources/analog-dialogue/articles/choosing-the-best-vibration-sensor-for-wind-turbine-condition-monitoring.html)**  
   Exemplifies the use of advanced sensor technologies and data processing, including image-based methods, in modern industrial applications.
+
+---
+
+## 🔐 Encryption Service
+
+To handle sensitive data securely, a new **Encrypter Service** and **SecuritySensor** have been added.
+
+### SecuritySensor (producer.py)
+- Publishes security-related events to the `secure/{line_id}` topic.
+- Payload includes fields such as `status_code`, `access_attempts`, `criticality`, and `source_ip`.
+
+### Encrypter Service (encrypter.py)
+- **Subscribe:** `secure/#` (all secure sensor topics).
+- **Encrypt:** Base64-encode the original JSON payload.
+- **Republish:** Send to `factory/{line_id}/{sensor_id}` with envelope:
+```json
+{
+  "encrypted_payload": "<base64-encoded-original>",
+  "source": "secure"
+}
+```
+- Supports automatic reconnect and error handling loops.
+
+### Control Center Updates (control-center.py)
+- Detects messages with `source: secure`.
+- Base64-decodes `encrypted_payload` back to the original JSON.
+- Applies specialized alert logic for security events (e.g., HTTP-style status codes 401,403,500; high criticality).
+- Continues legacy alert processing for standard sensor data.
 
 ---
 
