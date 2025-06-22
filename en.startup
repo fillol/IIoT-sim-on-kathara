@@ -4,4 +4,7 @@ ip addr add 10.2.2.1/24 dev eth1  # net_en_out
 ip link set eth0 up
 ip link set eth1 up
 # Default route for incoming traffic's source
-ip route add default via 10.2.1.1
+ip route add default via 10.2.2.2
+
+# Route to resp to publisher (optional)
+ip route add 10.1.0.0/16 via 10.2.1.1
