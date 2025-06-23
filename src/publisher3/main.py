@@ -1,65 +1,51 @@
-import asyncio
-import json
-import os
-import logging
-from asyncio_mqtt import Client as MqttClient
+import json, os, logging, time, requests, psutil
 from sensors.base_sensor import SensorConfig
-from sensors import VibrationSensor, TemperatureSensor, QualitySensor
+from sensors import VibrationSensor, TemperatureSensor, QualitySensor, SecuritySensor
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("Publisher")
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("Producer")
+
+CONTROL_CENTER_URL = os.getenv("CC_URL", "http://10.3.4.2:5000/data")
+ENCRYPTER_URL = os.getenv("ENCRYPTER_URL", "http://10.2.1.2:5000/encrypt")
+CONFIG_FILE_DIR = os.getenv("CONFIG_FILE_DIR", ".")
 
 class ProductionLine:
-    def __init__(self, config_file):
-        with open(f"{config_file}") as f:
-            self.config = json.load(f)
+    def __init__(self, config_file_path):
+        with open(config_file_path) as f: self.config = json.load(f)
         self.sensors = self._init_sensors()
+        self.process = psutil.Process(os.getpid())
 
     def _init_sensors(self):
-        sensors = []
-        for cfg in self.config["sensors"]:
-            sensor_class = {
-                "vibration": VibrationSensor,
-                "temperature": TemperatureSensor,
-                "quality": QualitySensor
-            }[cfg["type"]]
-
-            sensors.append((
-                sensor_class(
-                    self.config["line_id"],
-                    SensorConfig(
-                        sensor_type=cfg["type"],
-                        update_interval=cfg["interval"],
-                        payload_variation=cfg["payload"],
-                        qos=cfg["qos"]
-                    )
-                ),
-                cfg
-            ))
+        sensors, smap = [], {"vibration": VibrationSensor, "temperature": TemperatureSensor, "quality": QualitySensor, "security": SecuritySensor}
+        for cfg in self.config.get("sensors", []):
+            s_class = smap.get(cfg.get("type"))
+            if s_class:
+                sensors.append((s_class(self.config["line_id"], SensorConfig(cfg["type"], float(cfg["interval"]), cfg["payload"], int(cfg.get("qos",1)))), cfg))
         return sensors
 
-    async def run(self):
-        # Inizializza il client MQTT DENTRO il contesto asincrono
-        async with MqttClient(
-            hostname="10.0.0.2",
-            client_id=self.config["line_id"]
-        ) as client:
-            tasks = []
-            for sensor, cfg in self.sensors:
-                tasks.append(self._publish_sensor(client, sensor, cfg))
-            await asyncio.gather(*tasks)
-
-    async def _publish_sensor(self, client, sensor, config):
+    def run(self):
+        logger.info(f"Starting REST producer for line {self.config.get('line_id', 'N/A')}")
         while True:
-            payload = await sensor.generate_payload()
-            await client.publish(
-                topic=f"factory/{sensor.line_id}/{sensor.sensor_id}",
-                payload=payload,
-                qos=config["qos"]
-            )
-            logger.info(f"Published {len(payload)//1024}KB to {sensor.line_id}")
-            await asyncio.sleep(config["interval"])
+            for sensor, config in self.sensors:
+                self.send_data(sensor, config)
+            time.sleep(0.1)
+
+    def send_data(self, sensor, config):
+        mem_before = self.process.memory_info().rss / (1024 * 1024)
+        payload_dict = json.loads(sensor.generate_payload())
+        target_url = ENCRYPTER_URL if isinstance(sensor, SecuritySensor) else CONTROL_CENTER_URL
+        try:
+            r = requests.post(target_url, json=payload_dict, timeout=10)
+            r.raise_for_status()
+            mem_after = self.process.memory_info().rss / (1024 * 1024)
+            logger.info(f"Published to {target_url}. RAM usage: {mem_after - mem_before:.6f} MB")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to send data to {target_url}: {e}")
+        time.sleep(config.get("interval", 1.0))
 
 if __name__ == "__main__":
-    line = ProductionLine("line3.json")
-    asyncio.run(line.run())
+    config_path = os.path.join(CONFIG_FILE_DIR, "line3.json") 
+    try:
+        ProductionLine(config_path).run()
+    except Exception as e:
+        logger.critical(f"Failed to run production line: {e}", exc_info=True)
