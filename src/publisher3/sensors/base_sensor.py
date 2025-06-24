@@ -19,14 +19,9 @@ class IndustrialSensor:
         self.config = config
         self.sensor_id = fake.uuid4()[:8]
 
-    def _dummy_computation(self):
-        # This computation creates a memory-heavy object.
-        list_size = 30000 # Increased size for undeniable impact
-        dummy_list = [random.random() for _ in range(list_size)]
-        # We now return the list itself to keep it in memory.
-        return dummy_list
-
     def generate_payload(self):
+        # The payload generation is now clean, as the main computational
+        # load is handled by the Digital Twin worker process.
         base = {
             "timestamp": datetime.utcnow().isoformat(),
             "line_id": self.line_id,
@@ -34,19 +29,13 @@ class IndustrialSensor:
             "type": self.config.sensor_type
         }
         
-        dummy_list = self._dummy_computation()
-
         size = random.randint(*self._get_size_range(self.config.payload_variation))
-        # The content of the dummy list is not important, just its existence.
-        payload_data = {**base, **self._generate_specific_data(size), "dummy_check": len(dummy_list)}
+        payload_data = {**base, **self._generate_specific_data(size)}
         
         json_base = json.dumps(payload_data)
         missing_bytes = max(0, size - len(json_base))
         
-        payload_str = json.dumps({**payload_data, "padding": "0" * missing_bytes})
-        
-        # Return both the payload and the list that consumes memory
-        return payload_str, dummy_list
+        return json.dumps({**payload_data, "padding": "0" * missing_bytes})
 
     def _get_size_range(self, variation):
         return {"small": (1024, 10240), "medium": (10240, 102400), "large": (102400, 1048576)}[variation]
