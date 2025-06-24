@@ -1,6 +1,5 @@
 import random
 import json
-import hashlib # Import this for the dummy computation
 from datetime import datetime
 from dataclasses import dataclass
 from faker import Faker
@@ -21,12 +20,12 @@ class IndustrialSensor:
         self.sensor_id = fake.uuid4()[:8]
 
     def _dummy_computation(self):
-        # This is a dummy computation to simulate CPU/Memory load.
-        # It forces memory allocation that will be visible in the logs.
-        text = "a" * 1024  # Start with a 1KB string
-        for _ in range(5): # Loop to increase complexity
-            text = hashlib.sha256(text.encode()).hexdigest()
-        return len(text)
+        # This dummy computation is designed to be memory-heavy, not CPU-heavy.
+        # It creates a list of 10,000 random floats, forcing a noticeable memory allocation of a few hundred KBs.
+        list_size = 10000
+        dummy_list = [random.random() for _ in range(list_size)]
+        # Returning the sum makes it look like a real calculation was performed.
+        return sum(dummy_list)
 
     def generate_payload(self):
         base = {
