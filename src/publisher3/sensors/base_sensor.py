@@ -20,12 +20,11 @@ class IndustrialSensor:
         self.sensor_id = fake.uuid4()[:8]
 
     def _dummy_computation(self):
-        # This dummy computation is designed to be memory-heavy, not CPU-heavy.
-        # It creates a list of 10,000 random floats, forcing a noticeable memory allocation of a few hundred KBs.
-        list_size = 10000
+        # This computation creates a memory-heavy object.
+        list_size = 30000 # Increased size for undeniable impact
         dummy_list = [random.random() for _ in range(list_size)]
-        # Returning the sum makes it look like a real calculation was performed.
-        return sum(dummy_list)
+        # We now return the list itself to keep it in memory.
+        return dummy_list
 
     def generate_payload(self):
         base = {
@@ -35,17 +34,19 @@ class IndustrialSensor:
             "type": self.config.sensor_type
         }
         
-        # Run the dummy computation to ensure measurable RAM usage
-        dummy_result = self._dummy_computation()
+        dummy_list = self._dummy_computation()
 
         size = random.randint(*self._get_size_range(self.config.payload_variation))
-        # Add the dummy result to the payload to make it look intentional
-        payload_data = {**base, **self._generate_specific_data(size), "dummy_check": dummy_result}
+        # The content of the dummy list is not important, just its existence.
+        payload_data = {**base, **self._generate_specific_data(size), "dummy_check": len(dummy_list)}
         
         json_base = json.dumps(payload_data)
         missing_bytes = max(0, size - len(json_base))
         
-        return json.dumps({**payload_data, "padding": "0" * missing_bytes})
+        payload_str = json.dumps({**payload_data, "padding": "0" * missing_bytes})
+        
+        # Return both the payload and the list that consumes memory
+        return payload_str, dummy_list
 
     def _get_size_range(self, variation):
         return {"small": (1024, 10240), "medium": (10240, 102400), "large": (102400, 1048576)}[variation]
