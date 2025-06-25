@@ -1,6 +1,6 @@
 ![Industry 4.0](https://img.shields.io/badge/-Industry%204.0-4CAF50?logo=industry&logoColor=FFFF00)
 ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=ffd343)
-![MQTT](https://img.shields.io/badge/-MQTT-660099?logo=mosquitto&logoColor=white)
+**![Flask](https://img.shields.io/badge/-Flask-000000?logo=flask&logoColor=white)**
 ![Docker](https://img.shields.io/badge/-Docker-2496ED?logo=docker&logoColor=white)
 ![Kathará](https://img.shields.io/badge/-Kathara-blue?logo=linux&logoColor=white) 
 ![GitHub License](https://img.shields.io/badge/License-MIT-ff69b4)
@@ -10,17 +10,17 @@
 This project ports the original [Industrial IoT Simulator](https://github.com/fillol/IIoT-simulator) to run within the [Kathará](https://github.com/KatharaFramework/Kathara) network simulation environment. It allows simulating an Industrial IoT (IIoT) setup using Docker containers orchestrated by Kathará, providing a flexible platform for testing network interactions, security postures, and data flow patterns in complex IIoT scenarios.
 
 ## 📜 How it Works
-This simulator emulates three production lines (pressing, welding, painting) with virtual sensors compliant with Industry 4.0 standards. It generates realistic data (vibration, temperature, quality) transmitted via MQTT over a Kathará-managed network to a central control center with predictive alert logic.
+This simulator emulates three production lines (pressing, welding, painting) with virtual sensors compliant with Industry 4.0 standards. It generates realistic data (vibration, temperature, quality) transmitted via **HTTP requests** over a **complex, multi-hop** Kathará-managed network to a central control center with predictive alert logic.
 
 ### Key Features (Inherited from original):
 * **Realistic Sensor Data**: Vibration (ISO 10816 principles), Temperature (ISO 13732 principles), Quality Control metrics.
-* **MQTT Communication**: Configurable QoS levels, payload sizes, and frequencies.
-* **Modular Design**: Separate containers for production lines, MQTT broker, and control center.
+* **RESTful Communication**: Services communicate via HTTP requests using Flask, making the architecture robust and easily integrable.
+* **Modular Design**: Separate containers for production lines, an encrypter service, and a control center.
 * **Dynamic Configuration**: Sensor behavior defined in JSON files, decoupled from Python logic.
 
 ### Kathará Adaptation:
 * Uses Kathará for network topology definition and container orchestration (`lab.conf`, `.startup` files).
-* Allows for complex network setups (routers, different subnets) managed by Kathará.
+* Allows for complex network setups (with **multiple intermediate routers** and dedicated paths) managed by Kathará.
 * Provides interactive shells into each component via Kathará.
 
 ## 🚀 Usage
@@ -52,80 +52,68 @@ This simulator emulates three production lines (pressing, welding, painting) wit
     sudo kathara lstart
     ```
     This command will:
-    * Read `lab.conf` to understand the network topology and devices (p1, p2, p3, cc, mqtt, rtr).
+    * Read `lab.conf` to understand the network topology and devices (**p1, p2, p3, cc, en, int1, int2, int3, int4**).
     * Start Docker containers for each device.
     * Execute the corresponding `.startup` scripts within each container.
-    * Open terminal windows connected to each running container (p1, p2, p3, cc, mqtt, rtr).
+    * Open terminal windows connected to each running container.
 
 4.  **Monitor the Simulation:**
     * **Kathará Terminals**: The terminals opened by `Kathara lstart` provide direct shell access. However, due to the `entrypoint.sh` workaround (see notes below), the main Python scripts might not output directly to these terminals initially.
-    * **Docker Logs**: The primary way to see the simulator's output (sensor data, control center messages) is via `docker logs`. The container names are typically defined in `lab.conf` (e.g., `p1`, `p2`, `p3`, `cc`, `mqtt`).
+    * **Docker Logs**: The primary way to see the simulator's output (sensor data, control center messages) is via `docker logs`. The container names are typically defined in `lab.conf` (e.g., `p1`, `p2`, `p3`, `cc`, `en`).
         ```bash
         # Example: View logs for production line 1 and the control center
         docker logs -f p1
         docker logs -f cc
         ```
     * **Manual Execution (If Needed)**: Sometimes, the main scripts might not start automatically within the Kathará environment. If you don't see output in `docker logs` after a short while, you may need to manually start them in the respective Kathará terminals:
-        * In the `p1` terminal: `python main.py`
-        * In the `p2` terminal: `python main.py`
-        * In the `p3` terminal: `python main.py`
-        * In the `cc` terminal: `python main.py`
-        (The `mqtt` broker and `rtr` usually don't require manual intervention if their startup scripts are configured correctly).
+        * In the `p1`, `p2`, `p3` terminals: `python main.py`
+        * In the `cc` and `en` terminals: `python main.py`
+        (The intermediate routers usually don't require manual intervention).
 
 ### Kathará Specific Notes:
-* **Entrypoint Workaround**: Each service (`p1`, `p2`, `p3`, `cc`) uses an `entrypoint.sh` that typically launches `/bin/bash`. This keeps the container running and prevents Kathará from potentially terminating it immediately after the main process (like `python main.py`) might finish or if started as a background task within the `.startup` script. The actual application (`python main.py`) is intended to be launched by the `.startup` script or manually.
+* **Entrypoint Workaround**: Each service (`p1`, `p2`, `p3`, `cc`, `en`) uses an `entrypoint.sh` that typically launches `/bin/bash`. This keeps the container running and prevents Kathará from potentially terminating it immediately after the main process (like `python main.py`) might finish or if started as a background task within the `.startup` script. The actual application (`python main.py`) is intended to be launched by the `.startup` script or manually.
 * **Startup Reliability**: Script execution via `.startup` can sometimes be inconsistent depending on timing or environment factors within Kathará. Manual execution or checking `docker logs` is often necessary.
 
 ## 🏗️ Project Structure
 
 ```
 .
-├── cc.startup          # Startup script for the Control Center container
-├── en.startup          # Startup script for Encrypter
+├── cc.startup          # Startup script for the Control Center
+├── en.startup          # Startup script for the Encrypter
+├── int1.startup        # Startup scripts for intermediate routers
+├── int2.startup
+├── int3.startup
+├── int4.startup
 ├── lab.conf            # Kathará lab configuration (topology, devices)
-├── mqtt.startup        # Startup script for the MQTT Broker container
-├── p1.startup          # Startup script for Production Line 1
-├── p2.startup          # Startup script for Production Line 2
-├── p3.startup          # Startup script for Production Line 3
+├── p1.startup          # Startup scripts for production lines
+├── p2.startup
+├── p3.startup
 ├── readme.md           # This file
-├── rtr.startup         # Startup script for the Router container
-├── shared/             # Directory mounted into containers (if needed by Kathará config)
-└── src/                # Source code for the simulation components
+├── src/                # Source code for the simulation components
     ├── compose.yml     # Docker Compose file (used for building images)
-    ├── control-center/ # Central monitoring system logic (and decrypter)
-    │   ├── Dockerfile
-    │   ├── entrypoint.sh # Keeps container alive for Kathará
-    │   ├── main.py       # Real-time analysis logic
-    │   └── requirements.txt
-    ├── encrypter/      # Encryption Service (Secure Sensor)
-    ├── publisher1/     # Production Line 1 simulator
+    ├── control-center/ # Central monitoring system (Flask server)
     │   ├── Dockerfile
     │   ├── entrypoint.sh
-    │   ├── line1.json    # Configuration for Line 1
-    │   ├── main.py       # Sensor data generation/publishing
-    │   ├── requirements.txt
-    │   └── sensors/      # Sensor implementation code (shared logic)
-    │       ├── base_sensor.py
-    │       ├── __init__.py
-    │       ├── QualitySensor.py
-    │       ├── TemperatureSensor.py
-    │       └── VibrationSensor.py
-    ├── publisher2/     # Production Line 2 simulator (similar structure)
+    │   ├── main.py
+    │   └── requirements.txt
+    ├── encrypter/      # Encryption Service (REST Proxy)
+    │   └── ...
+    ├── publisher1/     # Production Line 1 simulator (REST client)
     │   ├── ...
-    │   └── line2.json
+    │   └── sensors/
+    │       └── ...
+    ├── publisher2/     # Production Line 2 simulator (similar structure)
+    │   └── ...
     └── publisher3/     # Production Line 3 simulator (similar structure)
-        ├── ...
-        └── line3.json
+        └── ...
 ```
-
-> **Note:** MQTT Broker (Mosquitto) is likely pulled as a standard image via lab.conf, not built from src/.
 
 ## 🔍 Composition:
 
 ### 🐳 Key Actors:
 
 #### 1. Production Lines (p1, p2, p3)
-* **Implementation:** Python scripts (`src/publisherX/main.py`) using sensor classes (`src/publisherX/sensors/`).
+* **Implementation:** Python scripts (`src/publisherX/main.py`) that act as **REST clients**.
 * **Configuration:** Defined in JSON files (`src/publisherX/lineX.json`). Example (`src/publisher1/line1.json`):
     ```json
     {
@@ -134,23 +122,22 @@ This simulator emulates three production lines (pressing, welding, painting) wit
         {
           "type": "vibration",
           "interval": 0.5,
-          "payload": "small",
-          "qos": 2
+          "payload": "small"
         }
       ]
     }
     ```
-* **Data Generation:** Simulates Vibration, Temperature, and Quality sensors based on industrial standards.
+* **Data Generation:** Simulates Vibration, Temperature, and Quality sensors and sends the data via **HTTP POST requests**.
 
 #### 2. Control Center (cc)
-* **Subscription:** Monitors MQTT topics (e.g., `factory/#`). Logic in `src/control-center/main.py`.
+* **Implementation:** A **Flask server** (`src/control-center/main.py`) that exposes a `/data` endpoint.
 * **Alert Logic:** Processes incoming data and triggers alerts based on predefined rules.
 
-#### 3. MQTT Broker (mqtt)
-* Typically the standard `eclipse-mosquitto` image, configured via `mqtt.startup` or a custom config file mounted by Kathará. Handles message queuing and delivery.
+#### 3. Encrypter (en)
+* **Implementation:** A **Flask-based REST proxy**. It receives data on an `/encrypt` endpoint, encrypts the payload, and forwards it to the Control Center.
 
-#### 4. Router (rtr)
-* A simple container (e.g., based on Alpine or FRR) configured by Kathará (`rtr.startup`) to route traffic between different network segments defined in `lab.conf`.
+#### 4. Intermediate Routers (int1, int2, int3, int4)
+* A set of simple containers (e.g., based on Alpine) configured by Kathará (`.startup` files) to route traffic between different network segments defined in `lab.conf`.
 
 ### 📦 Payload Strategy
 
@@ -261,13 +248,13 @@ To reinforce the design choices of the simulator, the following reputable source
 To handle sensitive data securely, a new **Encrypter Service** and **SecuritySensor** have been added.
 
 ### SecuritySensor (producer.py)
-- Publishes security-related events to the `secure/{line_id}` topic.
-- Payload includes fields such as `status_code`, `access_attempts`, `criticality`, and `source_ip`.
+- Generates security-related events.
+- Data from this sensor is sent to the **Encrypter service endpoint** (`/encrypt`).
 
 ### Encrypter Service (encrypter.py)
-- **Subscribe:** `secure/#` (all secure sensor topics).
-- **Encrypt:** Base64-encode the original JSON payload.
-- **Republish:** Send to `factory/{line_id}/{sensor_id}` with envelope:
+- **Receives** data on its `/encrypt` endpoint.
+- **Encrypts** the original JSON payload (Base64-encode).
+- **Forwards** the data to the Control Center's `/data` endpoint with an envelope:
 ```json
 {
   "encrypted_payload": "<base64-encoded-original>",
@@ -287,7 +274,7 @@ To handle sensitive data securely, a new **Encrypter Service** and **SecuritySen
 ## 🛠️ Customization in Kathará Environment
 
 ### 🔧 Customizing Sensor Parameters
-1.  Modify the desired JSON configuration file (e.g., `src/publisher1/line1.json`) within your project directory. Change intervals, payload sizes, or QoS levels.
+1.  Modify the desired JSON configuration file (e.g., `src/publisher1/line1.json`) within your project directory. Change intervals or payload sizes.
 2.  Rebuild the specific Docker image if required (often JSON changes do not require a rebuild if mounted correctly, but check your `.startup` and `lab.conf`). If unsure, rebuild:
     ```bash
     docker compose -f src/compose.yml build publisher1  # Or the specific service
@@ -325,7 +312,7 @@ To handle sensitive data securely, a new **Encrypter Service** and **SecuritySen
 ## 🏭 Conclusion: IIoT Simulation in a Network Context
 
 This Kathará-adapted simulator provides a powerful environment for:
-* Testing IIoT architectures within realistic or complex network topologies.
-* Analyzing the impact of network conditions (latency, packet loss—if simulated via Kathará) on MQTT communication.
+* Testing IIoT architectures with **RESTful services** within realistic or complex network topologies.
+* Analyzing the impact of network conditions (latency, packet loss—if simulated via Kathará) on **HTTP-based** communication.
 * Developing and validating network security policies for IIoT systems.
 * Training cybersecurity and network professionals on IIoT scenarios.
