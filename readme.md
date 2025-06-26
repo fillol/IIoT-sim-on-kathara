@@ -14,12 +14,12 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 
 ### Key Features (Inherited from original):
 * **Realistic Sensor Data**: Vibration (ISO 10816 principles), Temperature (ISO 13732 principles), Quality Control metrics.
-* **RESTful Communication**: Services communicate via HTTP requests using Flask, making the architecture robust and easily integrable.
 * **Modular Design**: Separate containers for production lines, an encrypter service, and a control center.
 * **Dynamic Configuration**: Sensor behavior defined in JSON files, decoupled from Python logic.
 
 ### Kathará Adaptation:
 * Uses Kathará for network topology definition and container orchestration (`lab.conf`, `.startup` files).
+* Services communicate via HTTP requests using Flask, making the architecture robust and easily integrable.
 * Allows for complex network setups (with **multiple intermediate routers** and dedicated paths) managed by Kathará.
 * Provides interactive shells into each component via Kathará.
 
