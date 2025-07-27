@@ -1,6 +1,6 @@
 ![Industry 4.0](https://img.shields.io/badge/-Industry%204.0-4CAF50?logo=industry&logoColor=FFFF00)
 ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=ffd343)
-**![Flask](https://img.shields.io/badge/-Flask-000000?logo=flask&logoColor=white)**
+![Flask](https://img.shields.io/badge/-Flask-000000?logo=flask&logoColor=white)
 ![Docker](https://img.shields.io/badge/-Docker-2496ED?logo=docker&logoColor=white)
 ![Kathará](https://img.shields.io/badge/-Kathara-blue?logo=linux&logoColor=white) 
 ![GitHub License](https://img.shields.io/badge/License-MIT-ff69b4)
@@ -10,11 +10,13 @@
 This project ports the original [Industrial IoT Simulator](https://github.com/fillol/IIoT-simulator) to run within the [Kathará](https://github.com/KatharaFramework/Kathara) network simulation environment. It allows simulating an Industrial IoT (IIoT) setup using Docker containers orchestrated by Kathará, providing a flexible platform for testing network interactions, security postures, and data flow patterns in complex IIoT scenarios.
 
 ## 📜 How it Works
-This simulator emulates three production lines (pressing, welding, painting) with virtual sensors compliant with Industry 4.0 standards. It generates realistic data (vibration, temperature, quality) transmitted via **HTTP requests** over a **complex, multi-hop** Kathará-managed network to a central control center with predictive alert logic.
+This simulator emulates three production lines (pressing, welding, painting) with virtual sensors compliant with Industry 4.0 standards. It generates realistic data (vibration, temperature, quality) transmitted via **HTTP requests** over a **complex, multi-hop** Kathará-managed network.
+
+The data flows through a pipeline of microservices: data is first sent to a **Dropper** service that simulates network unreliability and routes traffic. Secure payloads are sent to a dedicated **Decrypter** service, while standard data goes directly to a **Fault Detector**. The Fault Detector analyzes the data, and if an anomaly is found, it sends an alert to a **Digital Twin** service, which acts as the final logging endpoint.
 
 ### Key Features (Inherited from original):
 * **Realistic Sensor Data**: Vibration (ISO 10816 principles), Temperature (ISO 13732 principles), Quality Control metrics.
-* **Modular Design**: Separate containers for production lines, an encrypter service, and a control center.
+* **Microservice Architecture**: Separate containers for production lines and each stage of the data processing pipeline.
 * **Dynamic Configuration**: Sensor behavior defined in JSON files, decoupled from Python logic.
 
 ### Kathará Adaptation:
@@ -52,60 +54,37 @@ This simulator emulates three production lines (pressing, welding, painting) wit
     sudo kathara lstart
     ```
     This command will:
-    * Read `lab.conf` to understand the network topology and devices (**p1, p2, p3, cc, en, int1, int2, int3, int4**).
+    * Read `lab.conf` to understand the network topology and devices.
     * Start Docker containers for each device.
     * Execute the corresponding `.startup` scripts within each container.
     * Open terminal windows connected to each running container.
 
 4.  **Monitor the Simulation:**
-    * **Kathará Terminals**: The terminals opened by `Kathara lstart` provide direct shell access. However, due to the `entrypoint.sh` workaround (see notes below), the main Python scripts might not output directly to these terminals initially.
-    * **Docker Logs**: The primary way to see the simulator's output (sensor data, control center messages) is via `docker logs`. The container names are typically defined in `lab.conf` (e.g., `p1`, `p2`, `p3`, `cc`, `en`).
-        ```bash
-        # Example: View logs for production line 1 and the control center
-        docker logs -f p1
-        docker logs -f cc
-        ```
-    * **Manual Execution (If Needed)**: Sometimes, the main scripts might not start automatically within the Kathará environment. If you don't see output in `docker logs` after a short while, you may need to manually start them in the respective Kathará terminals:
-        * In the `p1`, `p2`, `p3` terminals: `python main.py`
-        * In the `cc` and `en` terminals: `python main.py`
-        (The intermediate routers usually don't require manual intervention).
+    The primary way to see the simulator's output is via `docker logs` or by manually running the applications inside the Kathará terminals.
+    *   **Manual Execution**: In the respective Kathará terminals:
+        *   In the `p1`, `p2`, `p3` terminals: `python main.py`
+        *   In the `dropper`, `decrypter`, `fault-detector`, and `digital-twin` terminals: `python main.py`
 
 ### Kathará Specific Notes:
-* **Entrypoint Workaround**: Each service (`p1`, `p2`, `p3`, `cc`, `en`) uses an `entrypoint.sh` that typically launches `/bin/bash`. This keeps the container running and prevents Kathará from potentially terminating it immediately after the main process (like `python main.py`) might finish or if started as a background task within the `.startup` script. The actual application (`python main.py`) is intended to be launched by the `.startup` script or manually.
-* **Startup Reliability**: Script execution via `.startup` can sometimes be inconsistent depending on timing or environment factors within Kathará. Manual execution or checking `docker logs` is often necessary.
+* **Entrypoint Workaround**: Each service uses an `entrypoint.sh` that launches `/bin/bash`. This keeps the container running and allows Kathará to attach a terminal. The actual application (`python main.py`) is intended to be launched by the `.startup` script or manually.
+* **Startup Reliability**: Script execution via `.startup` can sometimes be inconsistent. Manual execution or checking `docker logs` is often necessary.
 
 ## 🏗️ Project Structure
 
 ```
 .
-├── cc.startup          # Startup script for the Control Center
-├── en.startup          # Startup script for the Encrypter
-├── int1.startup        # Startup scripts for intermediate routers
-├── int2.startup
-├── int3.startup
-├── int4.startup
 ├── lab.conf            # Kathará lab configuration (topology, devices)
-├── p1.startup          # Startup scripts for production lines
-├── p2.startup
-├── p3.startup
+├── *.startup           # Kathará startup scripts
 ├── readme.md           # This file
-├── src/                # Source code for the simulation components
+└── src/                # Source code for the simulation components
     ├── compose.yml     # Docker Compose file (used for building images)
-    ├── control-center/ # Central monitoring system (Flask server)
-    │   ├── Dockerfile
-    │   ├── entrypoint.sh
-    │   ├── main.py
-    │   └── requirements.txt
-    ├── encrypter/      # Encryption Service (REST Proxy)
-    │   └── ...
     ├── publisher1/     # Production Line 1 simulator (REST client)
-    │   ├── ...
-    │   └── sensors/
-    │       └── ...
-    ├── publisher2/     # Production Line 2 simulator (similar structure)
-    │   └── ...
-    └── publisher3/     # Production Line 3 simulator (similar structure)
-        └── ...
+    ├── publisher2/     # Production Line 2 simulator
+    ├── publisher3/     # Production Line 3 simulator
+    ├── dropper/        # Simulates packet loss and routes traffic
+    ├── decrypter/      # Decrypts secure payloads
+    ├── fault-detector/ # Analyzes data and finds anomalies
+    └── digital-twin/   # Logs alerts from the fault detector
 ```
 
 ## 🔍 Composition:
@@ -114,30 +93,26 @@ This simulator emulates three production lines (pressing, welding, painting) wit
 
 #### 1. Production Lines (p1, p2, p3)
 * **Implementation:** Python scripts (`src/publisherX/main.py`) that act as **REST clients**.
-* **Configuration:** Defined in JSON files (`src/publisherX/lineX.json`). Example (`src/publisher1/line1.json`):
-    ```json
-    {
-      "line_id": "PRESS-LINE-1",
-      "sensors": [
-        {
-          "type": "vibration",
-          "interval": 0.5,
-          "payload": "small"
-        }
-      ]
-    }
-    ```
-* **Data Generation:** Simulates Vibration, Temperature, and Quality sensors and sends the data via **HTTP POST requests**.
+* **Function:** Simulates Vibration, Temperature, Quality, and Security sensors and sends all data via **HTTP POST requests** to the `Dropper` service.
 
-#### 2. Control Center (cc)
-* **Implementation:** A **Flask server** (`src/control-center/main.py`) that exposes a `/data` endpoint.
-* **Alert Logic:** Processes incoming data and triggers alerts based on predefined rules.
+#### 2. Dropper
+* **Implementation:** A Flask server that acts as the single entry point for all traffic.
+* **Function:** Simulates network unreliability by dropping packets based on a Poisson distribution. It then routes traffic based on the payload's content: secure data is sent to the `Decrypter`, while standard data is sent to the `Fault Detector`.
 
-#### 3. Encrypter (en)
-* **Implementation:** A **Flask-based REST proxy**. It receives data on an `/encrypt` endpoint, encrypts the payload, and forwards it to the Control Center.
+#### 3. Decrypter
+* **Implementation:** A Flask-based service.
+* **Function:** Receives encrypted payloads on its `/decrypt` endpoint, decrypts them, and forwards the clear-text data to the `Fault Detector`.
 
-#### 4. Intermediate Routers (int1, int2, int3, int4)
-* A set of simple containers (e.g., based on Alpine) configured by Kathará (`.startup` files) to route traffic between different network segments defined in `lab.conf`.
+#### 4. Fault Detector
+* **Implementation:** A Flask server that exposes a `/data` endpoint.
+* **Function:** Receives clear-text data from both the `Dropper` and `Decrypter`. It processes the data and triggers alerts based on predefined rules. Alerts are forwarded to the `Digital Twin`.
+
+#### 5. Digital Twin
+* **Implementation:** A Flask server.
+* **Function:** Exposes an `/update` endpoint that receives alerts from the `Fault Detector`. It simulates updating a digital twin's state by logging the alert to a file.
+
+#### 6. Intermediate Routers (int1, int2, int3, int4)
+* A set of simple containers configured by Kathará (`.startup` files) to route traffic between different network segments.
 
 ### 📦 Payload Strategy
 
@@ -245,28 +220,22 @@ To reinforce the design choices of the simulator, the following reputable source
 
 ## 🔐 Encryption Service
 
-To handle sensitive data securely, a new **Encrypter Service** and **SecuritySensor** have been added.
+To handle sensitive data securely, the architecture implements an end-to-end encryption flow.
 
-### SecuritySensor (producer.py)
-- Generates security-related events.
-- Data from this sensor is sent to the **Encrypter service endpoint** (`/encrypt`).
+### SecuritySensor (in `publisher1`)
+- Generates security-related events (e.g., access attempts).
+- **Encrypts** the entire JSON payload at the source using the `cryptography` library (Fernet symmetric encryption).
+- Wraps the encrypted data in a new JSON object: `{"source": "secure", "encrypted_payload": "..."}`.
+- Data from this sensor is sent to the `Dropper` service.
 
-### Encrypter Service (encrypter.py)
-- **Receives** data on its `/encrypt` endpoint.
-- **Encrypts** the original JSON payload (Base64-encode).
-- **Forwards** the data to the Control Center's `/data` endpoint with an envelope:
-```json
-{
-  "encrypted_payload": "<base64-encoded-original>",
-  "source": "secure"
-}
-```
-- Supports automatic reconnect and error handling loops.
+### Decrypter Service
+- **Receives** data on its `/decrypt` endpoint from the `Dropper`.
+- **Decrypts** the `encrypted_payload` using the shared symmetric key.
+- **Forwards** the original, clear-text data to the `Fault Detector`'s `/data` endpoint for analysis.
 
-### Control Center Updates (control-center.py)
-- Detects messages with `source: secure`.
-- Base64-decodes `encrypted_payload` back to the original JSON.
-- Applies specialized alert logic for security events (e.g., HTTP-style status codes 401,403,500; high criticality).
+### Fault Detector Updates
+- Detects standard and secure data (after decryption).
+- Applies specialized alert logic for security events (e.g., based on HTTP-style status codes 401, 403, 500).
 - Continues legacy alert processing for standard sensor data.
 
 ---
