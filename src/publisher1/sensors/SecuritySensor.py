@@ -27,22 +27,23 @@ class SecuritySensor(IndustrialSensor):
         return data
 
     def generate_payload(self):
-        base_payload = super().generate_payload()
+        # This method is overridden to handle the encryption of the entire payload.
+        # First, the standard payload is generated using the parent method.
+        base_payload_str = super().generate_payload()
         
         try:
-            payload_bytes = base_payload.encode('utf-8')
+            # The full JSON payload is encrypted using Fernet symmetric encryption.
+            payload_bytes = base_payload_str.encode('utf-8')
             encrypted_payload = cipher_suite.encrypt(payload_bytes)
             
+            # A new wrapper payload is created to be sent over the network.
             wrapper_payload = {
                 "encrypted_payload": encrypted_payload.decode('utf-8'),
                 "source": "secure"
             }
             
-            print(f"DEBUG: Sensor {self.sensor_id} has encrypted a payload.")
-
             return json.dumps(wrapper_payload)
             
         except Exception as e:
-            print(f"ERROR: Could not encrypt payload: {e}")
-
-            return json.dumps({"error": "encryption_failed"})
+            # Fallback in case of an encryption error.
+            return json.dumps({"error": "encryption_failed", "details": str(e)})

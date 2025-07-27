@@ -1,61 +1,60 @@
 import logging
 import json
-import base64
 import os
 import psutil
 import requests
 from flask import Flask, request
+from cryptography.fernet import Fernet
 
-# --- UNIFIED LOGGING CONFIGURATION ---
-# Define a clean, consistent log format for all services
+# LOGGING
 LOG_FORMAT = '%(asctime)s - %(name)-15s - %(levelname)-8s - %(message)s'
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
-
-# Silence the default Flask logger to reduce noise and avoid duplicate logs
 werkzeug_logger = logging.getLogger('werkzeug')
 werkzeug_logger.setLevel(logging.ERROR)
-
-logger = logging.getLogger("Encrypter")
+logger = logging.getLogger("Decrypter")
 app = Flask(__name__)
-process = psutil.Process(os.getpid())
-CONTROL_CENTER_URL = "http://10.4.4.2:5000/data"
 
+# URL of the next service in the pipeline for decrypted data.
+FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://fault-detector:5000/data")
 
-@app.route('/encrypt', methods=['POST'])
-def encrypt_and_forward():
-    # Measure RAM in Kilobytes for better precision
-    mem_before_kb = process.memory_info().rss / 1024
+# MUST match the one used by the SecuritySensor
+ENCRYPTION_KEY = b'u25A1N5g-jPAAZ_2CBl2i8o_HAG8AAnYq0_s2An1gE0='
+cipher_suite = Fernet(ENCRYPTION_KEY)
 
-    original_payload_dict = request.get_json(silent=True)
-    if not original_payload_dict:
-        return {"error": "Invalid JSON"}, 400
+@app.route('/decrypt', methods=['POST'])
+def decrypt_and_forward():
+    payload = request.get_json(silent=True)
+    if not payload or "encrypted_payload" not in payload:
+        logger.error("Invalid payload received. Missing 'encrypted_payload'.")
+        return {"error": "Invalid payload"}, 400
 
     try:
-        original_payload_str = json.dumps(original_payload_dict)
-        encoded_payload_str = base64.b64encode(original_payload_str.encode('utf-8')).decode('utf-8')
-        republish_payload = {"encrypted_payload": encoded_payload_str, "source": "secure"}
+        # Decryption
+        logger.info("Received an encrypted payload. Attempting to decrypt...")
+        encrypted_data = payload["encrypted_payload"].encode('utf-8')
+        
+        decrypted_bytes = cipher_suite.decrypt(encrypted_data)
+        decrypted_payload = json.loads(decrypted_bytes.decode('utf-8'))
+        
+        sensor_id = decrypted_payload.get("sensor_id", "secure_N/A")
+        logger.info(f"Payload from sensor {sensor_id} decrypted successfully.")
 
-        # Forward the encrypted payload to the Control Center
-        response = requests.post(CONTROL_CENTER_URL, json=republish_payload, timeout=5)
-        response.raise_for_status()
-        logger.info(f"Encrypted message forwarded to CC, status: {response.status_code}")
+        # Forward the now-decrypted payload to the Fault Detector.
+        try:
+            logger.info(f"Forwarding decrypted payload for {sensor_id} to Fault Detector.")
+            response = requests.post(FAULT_DETECTOR_URL, json=decrypted_payload, timeout=5)
+            response.raise_for_status()
+            logger.info(f"Successfully forwarded data for {sensor_id}. Status: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to forward decrypted message to Fault Detector: {e}")
+            return {"error": "Failed to forward after decryption"}, 502
 
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to forward message to Control Center: {e}")
-        return {"error": "Failed to forward"}, 502
     except Exception as e:
-        logger.error(f"Error processing message: {e}", exc_info=True)
-        return {"error": "Internal error"}, 500
-    
-    finally:
-        mem_after_kb = process.memory_info().rss / 1024
-        mem_diff_kb = mem_after_kb - mem_before_kb
-        # Log with high precision to see small changes
-        logger.info(f"Request finished. RAM usage: {mem_diff_kb:.4f} KB")
+        logger.error(f"Decryption failed or error processing message: {e}", exc_info=True)
+        return {"error": "Decryption failed"}, 500
 
-    return {"status": "encrypted and forwarded"}, 200
-
+    return {"status": "decrypted and forwarded"}, 200
 
 if __name__ == "__main__":
-    logger.info("Encrypter service starting as a Flask server...")
+    logger.info("Decrypter service starting as a Flask server...")
     app.run(host='0.0.0.0', port=5000)
