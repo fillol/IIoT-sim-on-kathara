@@ -1,15 +1,21 @@
 services:
-  control-center:
-    build: ./control-center
-
   production-line-1:
     build: ./publisher1
 
-  production-line-2:
-    build: ./publisher2
+  # production-line-2:
+  #   build: ./publisher2
 
-  production-line-3:
-    build: ./publisher3
+  # production-line-3:
+  #   build: ./publisher3
 
-  encrypter:
-    build: ./encrypter
+  dropper:
+    build: ./dropper
+
+  decrypter:
+    build: ./decrypter
+
+  fault-detector:
+    build: ./fault-detector
+
+  digital-twin:
+    build: ./digital-twin
