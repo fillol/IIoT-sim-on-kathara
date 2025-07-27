@@ -3,3 +3,5 @@ numpy==1.24.3
 Faker==18.12.0
 psutil==5.9.4
 cryptography==39.0.1
+coloredlogs==15.0.1
+waitress==2.1.2

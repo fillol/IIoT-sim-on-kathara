@@ -3,7 +3,7 @@
     "sensors": [
         {
             "type": "vibration",
-            "interval": 0.5,
+            "interval": 0.1,
             "payload": "small",
             "qos": 1
         },
