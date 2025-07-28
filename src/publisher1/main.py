@@ -46,6 +46,7 @@ class ProductionLine:
         
         payload_str = sensor.generate_payload()
         payload_dict = json.loads(payload_str)
+        payload_size_kb = len(payload_str.encode('utf-8')) / 1024
         
         try:
             # All data, secure or not, is sent to the Dropper service.
@@ -57,7 +58,7 @@ class ProductionLine:
             
             # Determine sensor type for logging purposes.
             sensor_type_log = "secure" if "encrypted_payload" in payload_dict else payload_dict.get("type", "N/A")
-            logger.info(f"Sensor type '{sensor_type_log}' published data via Dropper. RAM usage: {mem_diff_kb:.4f} KB")
+            logger.info(f"Sensor type '{sensor_type_log}' published data ({payload_size_kb:.2f} KB) via Dropper. RAM usage: {mem_diff_kb:.4f} KB")
 
         except requests.exceptions.RequestException as e:
             sensor_id_log = "N/A"

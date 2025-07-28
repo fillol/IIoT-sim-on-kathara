@@ -18,7 +18,7 @@ STATE_STORAGE_PATH = "/app/twin_state"
 if not os.path.exists(STATE_STORAGE_PATH):
     os.makedirs(STATE_STORAGE_PATH)
 
-def update_twin_state(alert_data):
+def update_twin_state(alert_data, payload_size_kb):
     """
     This function represents the core logic of the Digital Twin.
     It receives an alert and updates its internal state, simulating the
@@ -31,7 +31,7 @@ def update_twin_state(alert_data):
     state_file_path = os.path.join(STATE_STORAGE_PATH, f"{sensor_id}.state")
 
     logger.info(f"--- DIGITAL TWIN STATE UPDATE ---")
-    logger.info(f"Received alert '{alert_type}' for component '{sensor_id}'.")
+    logger.info(f"Received alert '{alert_type}' ({payload_size_kb:.2f} KB) for component '{sensor_id}'.")
     logger.info("Updating internal state representation...")
     
     # Simulates a state update by appending the alert to a log file.
@@ -45,12 +45,13 @@ def update_twin_state(alert_data):
 
 @app.route('/update', methods=['POST'])
 def receive_alert():
+    payload_size_kb = (request.content_length or 0) / 1024
     alert_payload = request.get_json(silent=True) or {}
     if not alert_payload:
         logger.warning("Received an empty update request.")
         return {"status": "empty_request"}, 400
     
-    update_twin_state(alert_payload)
+    update_twin_state(alert_payload, payload_size_kb)
     
     return {"status": "twin_state_updated"}, 200
 

@@ -25,10 +25,12 @@ FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://10.3.4.2:5000/data"
 
 @app.route('/data', methods=['POST'])
 def route_or_drop():
+    payload_size_kb = (request.content_length or 0) / 1024
+
     # A random value from a Poisson distribution is used to simulate packet loss.
     # If the value is greater than 0, the packet is "dropped".
     if np.random.poisson(lam=POISSON_LAMBDA) > 0:
-        logger.warning("SIMULATING PACKET LOSS: Message dropped based on Poisson distribution.")
+        logger.warning(f"SIMULATING PACKET LOSS: Message ({payload_size_kb:.2f} KB) dropped based on Poisson distribution.")
         # We return a 200 OK to the client to simulate a packet lost in transit,
         # where the client believes the send was successful.
         return {"status": "dropped"}, 200
@@ -45,10 +47,10 @@ def route_or_drop():
     log_prefix = "[SECURE -> DECRYPTER]" if is_secure else "[STANDARD -> FAULT-DETECTOR]"
 
     try:
-        logger.info(f"{log_prefix} Forwarding message to {target_url}...")
+        logger.info(f"{log_prefix} Forwarding message ({payload_size_kb:.2f} KB) to {target_url}...")
         response = requests.post(target_url, json=payload, timeout=5)
         response.raise_for_status()
-        logger.info(f"Message forwarded successfully. Downstream service responded with {response.status_code}.")
+        logger.info(f"Message ({payload_size_kb:.2f} KB) forwarded successfully. Downstream service responded with {response.status_code}.")
     except requests.exceptions.RequestException as e:
         logger.error(f"Failed to forward message to {target_url}: {e}")
         return {"error": "Failed to forward"}, 502

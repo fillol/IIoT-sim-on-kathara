@@ -21,12 +21,13 @@ def forward_alert_to_digital_twin(alert_payload):
     """Forwards a detected alert to the Digital Twin service for state update."""
     try:
         sensor_id = alert_payload.get('sensor_id', 'unknown')
-        logger.info(f"Forwarding alert for sensor {sensor_id} to Digital Twin.")
+        alert_size_kb = len(json.dumps(alert_payload).encode('utf-8')) / 1024
+        logger.info(f"Forwarding alert ({alert_size_kb:.2f} KB) for sensor {sensor_id} to Digital Twin.")
         requests.post(DIGITAL_TWIN_URL, json=alert_payload, timeout=5)
     except requests.exceptions.RequestException as e:
         logger.error(f"Could not forward alert to Digital Twin: {e}")
 
-def process_message(payload_dict):
+def process_message(payload_dict, payload_size_kb):
     """
     This is the core business logic for analyzing sensor data and detecting faults.
     It receives only clear-text data (standard or decrypted).
@@ -36,7 +37,7 @@ def process_message(payload_dict):
         line_id = payload_dict.get("line_id", "N/A")
         sensor_type = payload_dict.get("type")
         
-        logger.info(f"Analyzing data from {line_id}/{sensor_id} (type: {sensor_type}).")
+        logger.info(f"Analyzing data ({payload_size_kb:.2f} KB) from {line_id}/{sensor_id} (type: {sensor_type}).")
         
         # Rule set for decrypted security data.
         if "status_code" in payload_dict:
@@ -71,8 +72,9 @@ def process_message(payload_dict):
 
 @app.route('/data', methods=['POST'])
 def receive_data():
+    payload_size_kb = (request.content_length or 0) / 1024
     payload = request.get_json(silent=True) or {}
-    process_message(payload)
+    process_message(payload, payload_size_kb)
     return {"status": "analysis complete"}, 200
 
 if __name__ == "__main__":
