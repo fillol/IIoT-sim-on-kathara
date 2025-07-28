@@ -15,7 +15,7 @@ logger = logging.getLogger("Decrypter")
 app = Flask(__name__)
 
 # URL of the next service in the pipeline for decrypted data.
-FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://fault-detector:5000/data")
+FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://10.4.4.2:5000/data")
 
 # MUST match the one used by the SecuritySensor
 ENCRYPTION_KEY = b'u25A1N5g-jPAAZ_2CBl2i8o_HAG8AAnYq0_s2An1gE0='

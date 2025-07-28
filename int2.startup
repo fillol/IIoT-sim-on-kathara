@@ -1,8 +1,8 @@
 #!/bin/bash
 # Intermediate router 2 (main branching router)
 ip addr add 10.0.12.2/24 dev eth0   # br_12
-ip addr add 10.2.1.1/24 dev eth1    # net_en_in
-ip addr add 10.2.3.1/24 dev eth2    # br_23
+ip addr add 10.2.0.1/24 dev eth1    # net_main_in (to dropper)
+ip addr add 10.2.3.1/24 dev eth2    # br_23 (to int3)
 ip link set eth0 up
 ip link set eth1 up
 ip link set eth2 up
@@ -12,11 +12,8 @@ sysctl -w net.ipv4.ip_forward=1
 # Route to reach producers
 ip route add 10.1.0.0/16 via 10.0.12.1
 
-# Specific route for the encrypter service
-ip route add 10.2.2.0/24 via 10.2.1.2
+# Route to reach dropper
+ip route add 10.2.0.2/32 via 10.2.0.1
 
-# Specific route for standard traffic to CC
+# Route for standard traffic path (to fault-detector via int3)
 ip route add 10.3.4.0/24 via 10.2.3.2
-
-# This route is for encrypted traffic coming *back* from encrypter, heading to CC
-ip route add 10.4.4.0/24 via 10.2.1.2

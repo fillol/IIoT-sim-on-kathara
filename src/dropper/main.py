@@ -20,8 +20,8 @@ app = Flask(__name__)
 POISSON_LAMBDA = float(os.getenv("POISSON_LAMBDA", "0.1"))
 
 # Downstream service URLs are retrieved from environment variables for flexibility.
-DECRYPTER_URL = os.getenv("DECRYPTER_URL", "http://decrypter:5000/decrypt")
-FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://fault-detector:5000/data")
+DECRYPTER_URL = os.getenv("DECRYPTER_URL", "http://10.6.0.2:5000/decrypt")
+FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://10.3.4.2:5000/data")
 
 @app.route('/data', methods=['POST'])
 def route_or_drop():

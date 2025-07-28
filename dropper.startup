@@ -1,0 +1,9 @@
+#!/bin/bash
+
+ip addr add 10.2.0.2/24 dev eth0    # net_main_in (from int2)
+ip addr add 10.6.0.1/24 dev eth1    # net_drop_dec (to decrypter/en)
+ip link set eth0 up
+ip link set eth1 up
+
+# Route back to int2 to reach both standard and secure paths
+ip route add default via 10.2.0.1

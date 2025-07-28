@@ -1,9 +1,14 @@
 #!/bin/bash
-ip addr add 10.3.4.2/24 dev eth0   # net_cc_standard
-ip addr add 10.4.4.2/24 dev eth1   # net_cc_secure
+# This device is now the Fault-Detector
+ip addr add 10.3.4.2/24 dev eth0   # net_cc_standard (from int3)
+ip addr add 10.4.4.2/24 dev eth1   # net_cc_secure (from int4)
+ip addr add 10.7.0.1/24 dev eth2   # net_fd_dt (to digitaltwin)
 ip link set eth0 up
 ip link set eth1 up
-# Route for standard traffic
+ip link set eth2 up
+
+# Default route for general replies (e.g., standard path)
 ip route add default via 10.3.4.1
-# Route for secure traffic
+
+# Specific route for replies to the secure path via int4
 ip route add 10.2.2.0/24 via 10.4.4.1

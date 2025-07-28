@@ -14,7 +14,7 @@ logger = logging.getLogger("Producer")
 
 # All publishers send data to a single entry point: the Dropper service.
 # This service is responsible for simulating network issues and routing traffic.
-DROPPER_URL = os.getenv("DROPPER_URL", "http://dropper:5000/data")
+DROPPER_URL = os.getenv("DROPPER_URL", "http://10.2.0.2:5000/data")
 CONFIG_FILE_DIR = os.getenv("CONFIG_FILE_DIR", ".")
 
 

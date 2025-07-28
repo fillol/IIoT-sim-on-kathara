@@ -15,7 +15,7 @@ logger = logging.getLogger("FaultDetector")
 app = Flask(__name__)
 
 # URL of the Digital Twin service, which receives detected alerts.
-DIGITAL_TWIN_URL = os.getenv("DIGITAL_TWIN_URL", "http://digital-twin:5000/update")
+DIGITAL_TWIN_URL = os.getenv("DIGITAL_TWIN_URL", "http://10.7.0.2:5000/update")
 
 def forward_alert_to_digital_twin(alert_payload):
     """Forwards a detected alert to the Digital Twin service for state update."""
