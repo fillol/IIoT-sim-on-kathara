@@ -1,7 +1,7 @@
 # This Docker Compose file is for local testing without Kathará.
 services:
   production-line-1:
-    build: ./publisher1
+    build: ./src/publisher1
     entrypoint: python main.py
     environment:
       - DROPPER_URL=http://dropper:5000/data
@@ -25,7 +25,7 @@ services:
   #     - dropper
 
   dropper:
-    build: ./dropper
+    build: ./src/dropper
     entrypoint: python main.py
     ports:
       - "5000:5000"
@@ -38,7 +38,7 @@ services:
       - fault-detector
 
   decrypter:
-    build: ./decrypter
+    build: ./src/decrypter
     entrypoint: python main.py
     environment:
       - FAULT_DETECTOR_URL=http://fault-detector:5000/data
@@ -46,7 +46,7 @@ services:
       - fault-detector
   
   fault-detector:
-    build: ./fault-detector
+    build: ./src/fault-detector
     entrypoint: python main.py
     environment:
       - DIGITAL_TWIN_URL=http://digital-twin:5000/update
@@ -54,14 +54,14 @@ services:
       - digital-twin
 
   digital-twin:
-    build: ./digital-twin
+    build: ./src/digital-twin
     entrypoint: python main.py
     ports:
       - "5001:5000"
 
   benchmark:
     build: ./benchmark
+    volumes:
+      - ./results:/app/results
     depends_on:
       - dropper
-    volumes:
-      - ./benchmark_results:/app/results
