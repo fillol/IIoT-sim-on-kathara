@@ -2,7 +2,7 @@
 
 set -e
 
-COMPOSE_FILE="docker-compose.benchmark.yml"
+COMPOSE_FILE="compose-benchmark.yml"
 PROJECT_NAME="src"
 RESULTS_DIR="results"
 STATS_FILE="${RESULTS_DIR}/stats.csv"
