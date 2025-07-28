@@ -1,0 +1,7 @@
+#!/bin/bash
+# This is the final service, the Digital Twin
+ip addr add 10.7.0.2/24 dev eth0   # net_fd_dt (from fault-detector)
+ip link set eth0 up
+
+# Route back to the fault-detector
+ip route add default via 10.7.0.1

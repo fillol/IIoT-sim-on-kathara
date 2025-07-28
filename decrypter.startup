@@ -1,0 +1,11 @@
+#!/bin/bash
+
+ip addr add 10.6.0.2/24 dev eth0    # net_drop_dec (from dropper)
+ip addr add 10.2.2.1/24 dev eth1    # net_en_out (to int4)
+ip link set eth0 up
+ip link set eth1 up
+
+# Route back to dropper
+ip route add 10.2.0.0/24 via 10.6.0.1
+# Default route for forwarding decrypted data to fault-detector via int4
+ip route add default via 10.2.2.2
