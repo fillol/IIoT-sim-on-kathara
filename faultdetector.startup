@@ -1,7 +1,7 @@
 #!/bin/bash
-# This device is now the Fault-Detector
-ip addr add 10.3.4.2/24 dev eth0   # net_cc_standard (from int3)
-ip addr add 10.4.4.2/24 dev eth1   # net_cc_secure (from int4)
+
+ip addr add 10.3.4.2/24 dev eth0   # net_fd_standard (from int3)
+ip addr add 10.4.4.2/24 dev eth1   # net_fd_secure (from int4)
 ip addr add 10.7.0.1/24 dev eth2   # net_fd_dt (to digitaltwin)
 ip link set eth0 up
 ip link set eth1 up

@@ -1,5 +1,5 @@
 #!/bin/bash
-# This device is now the Decrypter
+
 ip addr add 10.6.0.2/24 dev eth0    # net_drop_dec (from dropper)
 ip addr add 10.2.2.1/24 dev eth1    # net_en_out (to int4)
 ip link set eth0 up
