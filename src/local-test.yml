@@ -1,5 +1,4 @@
 # This Docker Compose file is for local testing without Kathará.
-
 services:
   production-line-1:
     build: ./publisher1
@@ -59,3 +58,10 @@ services:
     entrypoint: python main.py
     ports:
       - "5001:5000"
+
+  benchmark:
+    build: ./benchmark
+    depends_on:
+      - dropper
+    volumes:
+      - ./benchmark_results:/app/results
