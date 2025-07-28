@@ -2,7 +2,7 @@
 
 set -e
 
-COMPOSE_FILE="local-test.yml"
+COMPOSE_FILE="docker-compose.benchmark.yml"
 PROJECT_NAME="src"
 RESULTS_DIR="results"
 STATS_FILE="${RESULTS_DIR}/stats.csv"
@@ -16,12 +16,12 @@ rm -rf ./${RESULTS_DIR}
 mkdir -p $RESULTS_DIR
 echo " [OK]"
 
-# 2. Start services in the background, suppressing verbose output
+# 2. Start services using the dedicated benchmark compose file
 echo -n "Bringing services down..."
 docker compose -f $COMPOSE_FILE -p $PROJECT_NAME down --remove-orphans > /dev/null 2>&1
 echo " [OK]"
 
-echo -n "Building and starting services..."
+echo -n "Building and starting services for benchmark..."
 docker compose -f $COMPOSE_FILE -p $PROJECT_NAME up --build -d > /dev/null 2>&1
 echo " [OK]"
 

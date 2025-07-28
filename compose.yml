@@ -8,22 +8,6 @@ services:
     depends_on:
       - dropper
 
-  # production-line-2:
-  #   build: ./publisher2
-  #   entrypoint: python main.py
-  #   environment:
-  #     - DROPPER_URL=http://dropper:5000/data
-  #   depends_on:
-  #     - dropper
-
-  # production-line-3:
-  #   build: ./publisher3
-  #   entrypoint: python main.py
-  #   environment:
-  #     - DROPPER_URL=http://dropper:5000/data
-  #   depends_on:
-  #     - dropper
-
   dropper:
     build: ./src/dropper
     entrypoint: python main.py
@@ -58,10 +42,3 @@ services:
     entrypoint: python main.py
     ports:
       - "5001:5000"
-
-  benchmark:
-    build: ./benchmark
-    volumes:
-      - ./results:/app/results
-    depends_on:
-      - dropper
