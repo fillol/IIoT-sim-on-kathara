@@ -1,16 +1,15 @@
 # This Docker Compose file is dedicated SOLELY to running the benchmark experiment.
-# It defines the minimum required application stack plus the benchmark service itself.
+# It overrides entrypoints and sets environment variables for service discovery.
 services:
   # --- Application Services Under Test ---
   dropper:
-    build: ../src/dropper # Path relative to this file's location
+    build: ../src/dropper
     entrypoint: python main.py
     ports:
       - "5000:5000"
     environment:
       - DECRYPTER_URL=http://decrypter:5000/decrypt
       - FAULT_DETECTOR_URL=http://fault-detector:5000/data
-      - POISSON_LAMBDA=0.1
     depends_on:
       - decrypter
       - fault-detector
@@ -37,15 +36,10 @@ services:
     ports:
       - "5001:5000"
   
-  # NOTE: 'production-line-1' is not included because the 'benchmark'
-  # service acts as the data producer for this test.
-
   # --- Benchmark Runner Service ---
   benchmark:
-    # Build context is the current directory ('.') where the Dockerfile resides
     build: .
     depends_on:
       - dropper
-    # Mount the local 'results' directory into the container
     volumes:
       - ./results:/app/results
