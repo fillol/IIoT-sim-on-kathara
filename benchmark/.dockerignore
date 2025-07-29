@@ -1,8 +1,6 @@
-.git
-.gitignore
-run_experiment.sh
+run.sh
 report_generator.py
-docker-compose.benchmark.yml
+compose-benchmark.yml
 results/
 __pycache__/
 *.pyc
