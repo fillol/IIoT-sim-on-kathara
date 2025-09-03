@@ -4,6 +4,7 @@ services:
   # --- Application Services Under Test ---
   dropper:
     build: ../src/dropper
+    image: iiot-kathara/dropper:latest
     entrypoint: python main.py
     ports:
       - "5000:5000"
@@ -16,6 +17,7 @@ services:
 
   decrypter:
     build: ../src/decrypter
+    image: iiot-kathara/decrypter:latest
     entrypoint: python main.py
     environment:
       - FAULT_DETECTOR_URL=http://fault-detector:5000/data
@@ -24,6 +26,7 @@ services:
   
   fault-detector:
     build: ../src/fault-detector
+    image: iiot-kathara/fault-detector:latest
     entrypoint: python main.py
     environment:
       - DIGITAL_TWIN_URL=http://digital-twin:5000/update
@@ -32,6 +35,7 @@ services:
 
   digital-twin:
     build: ../src/digital-twin
+    image: iiot-kathara/digital-twin:latest
     entrypoint: python main.py
     ports:
       - "5001:5000"
@@ -41,5 +45,13 @@ services:
     build: .
     depends_on:
       - dropper
+      - decrypter
+      - fault-detector
+      - digital-twin
     volumes:
       - ./results:/app/results
+    environment:
+      - DROPPER_HOST=dropper
+      - DECRYPTER_HOST=decrypter
+      - FAULT_DETECTOR_HOST=fault-detector
+      - DIGITAL_TWIN_HOST=digital-twin
