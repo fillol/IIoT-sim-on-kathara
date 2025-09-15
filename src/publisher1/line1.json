@@ -18,6 +18,12 @@
             "interval": 5.0,
             "payload": "small",
             "qos": 1
+        },
+        {
+            "type": "image_security",
+            "interval": 8.0,
+            "payload": "large",
+            "qos": 1
         }
     ]
 }

@@ -3,6 +3,7 @@ from .VibrationSensor import VibrationSensor
 from .TemperatureSensor import TemperatureSensor
 from .QualitySensor import QualitySensor
 from .SecuritySensor import SecuritySensor
+from .ImageSecuritySensor import ImageSecuritySensor
 
 all = [
     'SensorConfig',
@@ -10,5 +11,6 @@ all = [
     'VibrationSensor',
     'TemperatureSensor',
     'QualitySensor',
-    'SecuritySensor'
+    'SecuritySensor',
+    'ImageSecuritySensor'
 ]
