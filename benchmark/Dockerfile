@@ -4,7 +4,3 @@ RUN apt-get update && apt-get install -y apache2-utils curl && rm -rf /var/lib/a
 RUN pip install numpy
 
 WORKDIR /app
-COPY benchmark.sh .
-RUN chmod +x ./benchmark.sh
-
-ENTRYPOINT ["./benchmark.sh"]

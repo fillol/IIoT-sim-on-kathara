@@ -1,7 +1,7 @@
 # This Docker Compose file is dedicated SOLELY to running the benchmark experiment.
 # It overrides entrypoints and sets environment variables for service discovery.
 services:
-  # --- Application Services Under Test ---
+  # Application Services Under Test
   dropper:
     build: ../src/dropper
     image: iiot-kathara/dropper:latest
@@ -11,6 +11,7 @@ services:
     environment:
       - DECRYPTER_URL=http://decrypter:5000/decrypt
       - FAULT_DETECTOR_URL=http://fault-detector:5000/data
+      - POISSON_LAMBDA=0
     depends_on:
       - decrypter
       - fault-detector
@@ -19,6 +20,8 @@ services:
     build: ../src/decrypter
     image: iiot-kathara/decrypter:latest
     entrypoint: python main.py
+    ports:
+      - "5002:5000"
     environment:
       - FAULT_DETECTOR_URL=http://fault-detector:5000/data
     depends_on:
@@ -28,6 +31,8 @@ services:
     build: ../src/fault-detector
     image: iiot-kathara/fault-detector:latest
     entrypoint: python main.py
+    ports:
+      - "5003:5000"
     environment:
       - DIGITAL_TWIN_URL=http://digital-twin:5000/update
     depends_on:
@@ -40,18 +45,9 @@ services:
     ports:
       - "5001:5000"
   
-  # --- Benchmark Runner Service ---
+  # Benchmark Runner Service
   benchmark:
     build: .
-    depends_on:
-      - dropper
-      - decrypter
-      - fault-detector
-      - digital-twin
+    image: iiot-kathara/benchmark:latest
     volumes:
       - ./results:/app/results
-    environment:
-      - DROPPER_HOST=dropper
-      - DECRYPTER_HOST=decrypter
-      - FAULT_DETECTOR_HOST=fault-detector
-      - DIGITAL_TWIN_HOST=digital-twin
