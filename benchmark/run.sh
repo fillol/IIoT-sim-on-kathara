@@ -7,8 +7,8 @@ PROJECT_NAME="iiot-kathara"
 RESULTS_DIR="results"
 TOTAL_LOOPS=3
 
-DEFAULT_REQUESTS=500
-DEFAULT_CONCURRENCY=20
+DEFAULT_REQUESTS=100
+DEFAULT_CONCURRENCY=2
 
 # Environment Preparation
 echo "===> Cleaning and preparing environment"
@@ -152,9 +152,9 @@ run_profile_test "digital-twin" "digital-twin" 5001 "/update" '{"sensor_id":"dt-
 run_profile_test "decrypter" "decrypter" 5002 "/decrypt" "${PAYLOAD_SECURE}" "Decrypter"
 run_profile_test "dropper" "dropper" 5000 "/data" '{"type":"vibration","x":4.0}' "Dropper_StandardPath"
 run_profile_test "dropper" "dropper" 5000 "/data" "${PAYLOAD_SECURE}" "Dropper_SecurePath"
-run_profile_test "fault-detector" "fault-detector" 5003 "/data" '{"type":"quality","defect_count":6}' "FaultDetector_Standard"
-run_profile_test "dropper" "dropper" 5000 "/data" "${PAYLOAD_SECURE_IMAGE}" "Dropper_SecureImagePath" 50 2 120
-run_profile_test "fault-detector" "fault-detector" 5003 "/data" "${PAYLOAD_IMAGE_DECRYPTED}" "FaultDetector_Image" 50 2 120
+run_profile_test "dropper" "dropper" 5000 "/data" "${PAYLOAD_SECURE_IMAGE}" "Dropper_SecureImagePath" $DEFAULT_REQUESTS $DEFAULT_CONCURRENCY 120
+run_profile_test "fault-detector" "fault-detector" 5003 "/data" '{"type":"quality","defect_count":6, "sensor_id": "quality-test", "line_id": "BENCH-STD"}' "FaultDetector_Standard"
+run_profile_test "fault-detector" "fault-detector" 5003 "/data" "${PAYLOAD_IMAGE_DECRYPTED}" "FaultDetector_Image" $DEFAULT_REQUESTS $DEFAULT_CONCURRENCY 120
 
 echo -e "\n================================================="
 echo "PROFILING COMPLETED. FINAL SUMMARY:"
