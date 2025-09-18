@@ -44,7 +44,7 @@ CLASSIFICATION_NAMEMAP = [
     'axes', 'boots', 'carabiners', 'crampons', 'gloves', 'hardshell_jackets',
     'harnesses', 'helmets', 'insulated_jackets', 'pulleys', 'rope', 'tents'
 ]
-UNAUTHORIZED_OBJECTS = {'axes', 'crampons', 'pulleys'}
+UNAUTHORIZED_OBJECTS = {'axes', 'tents', 'pulleys'}
 
 def resize(image):
     """Resizes an image to fit within a fixed 128x128 canvas, maintaining aspect ratio."""
@@ -164,6 +164,10 @@ def process_message(payload_dict, payload_size_kb):
 def receive_data():
     payload_size_kb = (request.content_length or 0) / 1024
     payload = request.get_json(silent=True) or {}
+    
+    if not payload:
+        logger.error("JSON parsing failed! The payload was empty or malformed.")
+
     process_message(payload, payload_size_kb)
     return {"status": "analysis complete"}, 200
 
