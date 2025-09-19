@@ -2,6 +2,7 @@
 services:
   production-line-1:
     build: ./src/publisher1
+    image: iiot-kathara/publisher1:latest
     entrypoint: python main.py
     environment:
       - DROPPER_URL=http://dropper:5000/data
@@ -10,6 +11,7 @@ services:
 
   dropper:
     build: ./src/dropper
+    image: iiot-kathara/dropper:latest
     entrypoint: python main.py
     ports:
       - "5000:5000"
@@ -23,6 +25,7 @@ services:
 
   decrypter:
     build: ./src/decrypter
+    image: iiot-kathara/decrypter:latest
     entrypoint: python main.py
     environment:
       - FAULT_DETECTOR_URL=http://fault-detector:5000/data
@@ -31,6 +34,7 @@ services:
   
   fault-detector:
     build: ./src/fault-detector
+    image: iiot-kathara/fault-detector:latest
     entrypoint: python main.py
     environment:
       - DIGITAL_TWIN_URL=http://digital-twin:5000/update
@@ -39,6 +43,7 @@ services:
 
   digital-twin:
     build: ./src/digital-twin
+    image: iiot-kathara/digital-twin:latest
     entrypoint: python main.py
     ports:
       - "5001:5000"

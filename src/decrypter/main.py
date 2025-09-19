@@ -5,6 +5,7 @@ import psutil
 import requests
 from flask import Flask, request
 from cryptography.fernet import Fernet
+import numpy as np
 
 # LOGGING
 LOG_FORMAT = '%(asctime)s - %(name)-15s - %(levelname)-8s - %(message)s'
@@ -13,6 +14,16 @@ werkzeug_logger = logging.getLogger('werkzeug')
 werkzeug_logger.setLevel(logging.ERROR)
 logger = logging.getLogger("Decrypter")
 app = Flask(__name__)
+
+try:
+    RAM_LOAD_MB = 300
+    logger.info(f"Simulating RAM load: allocating a {RAM_LOAD_MB}MB numpy array...")
+    num_elements = (RAM_LOAD_MB * 1024 * 1024) // 8
+    REFERENCE_DATASET = np.random.rand(num_elements)
+    logger.info("RAM load simulation complete. Memory allocated.")
+except Exception as e:
+    logger.error(f"Failed to allocate memory for RAM load simulation: {e}")
+    REFERENCE_DATASET = None
 
 # URL of the next service in the pipeline for decrypted data.
 FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://10.4.4.2:5000/data")

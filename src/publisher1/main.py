@@ -5,7 +5,7 @@ import time
 import requests
 import psutil
 from sensors.base_sensor import SensorConfig
-from sensors import VibrationSensor, TemperatureSensor, QualitySensor, SecuritySensor
+from sensors import VibrationSensor, TemperatureSensor, QualitySensor, SecuritySensor, ImageSecuritySensor
 
 # UNIFIED LOGGING CONFIGURATION
 LOG_FORMAT = '%(asctime)s - %(name)-15s - %(levelname)-8s - %(message)s'
@@ -28,7 +28,13 @@ class ProductionLine:
     def _init_sensors(self):
         sensors = []
         # The sensor map dynamically loads the correct sensor class based on config.
-        smap = {"vibration": VibrationSensor, "temperature": TemperatureSensor, "quality": QualitySensor, "security": SecuritySensor}
+        smap = {
+            "vibration": VibrationSensor, 
+            "temperature": TemperatureSensor, 
+            "quality": QualitySensor, 
+            "security": SecuritySensor,
+            "image_security": ImageSecuritySensor
+        }
         for cfg in self.config.get("sensors", []):
             s_class = smap.get(cfg.get("type"))
             if s_class:
