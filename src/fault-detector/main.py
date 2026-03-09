@@ -12,7 +12,6 @@ import io
 from PIL import Image, ImageFilter
 
 # LOGGING
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 LOG_FORMAT = '%(asctime)s - %(name)-15s - %(levelname)-8s - %(message)s'
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 werkzeug_logger = logging.getLogger('werkzeug')
