@@ -9,8 +9,14 @@
         },
         {
             "type": "temperature",
-            "interval": 2.0,
+            "interval": 1.0,
             "payload": "medium",
+            "qos": 1
+        },
+        {
+            "type": "quality",
+            "interval": 3.0,
+            "payload": "large",
             "qos": 1
         },
         {
