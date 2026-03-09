@@ -1,4 +1,12 @@
 #!/bin/bash
+
 ip addr add 10.1.1.2/24 dev eth0
 ip link set eth0 up
 ip route add default via 10.1.1.1 dev eth0
+
+set +x
+echo
+echo Start the application with "python3 main.py"
+echo See the logs of other services from another shell with "kathara exec *service* -- tail -f /shared/*service*.log"
+echo
+set -x
