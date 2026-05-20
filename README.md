@@ -9,7 +9,7 @@ This is the **lightweight** version of the IIoT Simulator. It does not contain t
 
 ## 📜 How it Works
 
-This simulator emulates an Industrial IoT setup with three production lines. The logic is identical to the full version, but images are pulled directly from Docker Hub (`fillol/iiot-*`).
+This simulator emulates an Industrial IoT setup with three production lines. The logic is identical to the full version, but images are pulled directly from Docker Hub (`fillol/iiot-kathara-*`).
 
 The data flows through:
 `Publisher` → `Dropper` → `Decrypter` (if secure) → `Fault Detector` → `Digital Twin`.
