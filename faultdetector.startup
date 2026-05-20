@@ -12,3 +12,6 @@ ip route add default via 10.3.4.1
 
 # Specific route for replies to the secure path via int4
 ip route add 10.2.2.0/24 via 10.4.4.1
+
+# Start the fault-detector application
+python main.py >> /shared/faultdetector.log 2>&1 &

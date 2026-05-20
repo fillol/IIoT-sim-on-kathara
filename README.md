@@ -36,7 +36,19 @@ The data flows through a pipeline of microservices: data is first sent to a **Dr
 *   Docker and Docker Compose (used for building images).
 *   Python 3.10+ (Optional: for potential local script testing).
 
-### Quick Start
+### ⚡ Quick Start (Unified Command)
+
+For a fast run, you can build and launch everything with a single command. This will start the network, monitor the logs of `p1`, and clean up everything when you terminate it:
+
+```bash
+docker compose build && sudo kathara lstart --noterminals && sudo kathara connect --logs p1 && sudo kathara lclean
+```
+
+---
+
+### 🛠️ Manual Execution (Step-by-Step)
+
+If you want to understand each part or debug the system, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
@@ -45,29 +57,26 @@ The data flows through a pipeline of microservices: data is first sent to a **Dr
     ```
 
 2.  **Build the Docker Images:**
-    The project uses Docker Compose to build the required service images. From the repository's root directory, run:
+    The project uses Docker Compose to build the required service images.
     ```bash
-    # Build all service images needed for the simulation
     docker compose build
     ```
 
 3.  **Launch the Kathará Lab:**
-    Use the `lstart` command to start the network simulation environment defined in `lab.conf`.
-    *Important:* This often requires `sudo` permissions.
+    Use `lstart` to start the network simulation. This will open terminal windows for each device.
     ```bash
     sudo kathara lstart
     ```
-    This command will:
-    *   Read `lab.conf` to understand the network topology and devices.
-    *   Start Docker containers for each device using the pre-built images.
-    *   Execute the corresponding `.startup` scripts within each container to configure networking.
-    *   Open terminal windows connected to each running container.
+    *Note: The microservices (Dropper, Decrypter, Fault Detector, Digital Twin) are automatically started via `.startup` scripts.*
 
-4.  **Monitor the Simulation:**
-    The primary way to see the simulator's output is by manually running the applications inside the Kathará terminals.
-    *   **Manual Execution**: In the respective Kathará terminals:
-        *   In the `p1`, `p2`, `p3` terminals: `python main.py`
-        *   In the `dropper`, `decrypter`, `fault-detector`, and `digital-twin` terminals: `python main.py`
+4.  **Start the Producers:**
+    In the terminals for `p1`, `p2`, or `p3`, manually start the data generation:
+    ```bash
+    python main.py
+    ```
+
+5.  **Monitor Output:**
+    You can watch the logs in the opened terminals or check the shared logs.
 
 ### Kathará Specific Notes:
 
@@ -119,11 +128,11 @@ CONCURRENCY=20      # Number of multiple requests to perform at a time
 .
 ├── lab.conf            # Kathará lab configuration (topology, devices)
 ├── *.startup           # Kathará startup scripts
-├── readme.md           # This file
+├── README.md           # This file
 ├── compose.yml         # Docker Compose file for building images and local dev
 ├── benchmark/          # Self-contained benchmark suite
 │   ├── run.sh          # Main script to run the benchmark
-│   └── ...             # Other benchmark-related files
+│   └── README.md       # Benchmark documentation
 └── src/                # Source code for the simulation components
     ├── publisher1/     # Production Line 1 simulator (REST client)
     ├── publisher2/     # Production Line 2 simulator

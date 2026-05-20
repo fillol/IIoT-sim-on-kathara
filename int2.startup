@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Intermediate router 2 (main branching router)
 ip addr add 10.0.12.2/24 dev eth0   # br_12
 ip addr add 10.2.0.1/24 dev eth1    # net_main_in (to dropper)

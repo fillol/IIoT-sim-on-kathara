@@ -7,3 +7,6 @@ ip link set eth1 up
 
 # Route back to int2 to reach both standard and secure paths
 ip route add default via 10.2.0.1
+
+# Start the dropper application
+python main.py >> /shared/dropper.log 2>&1 &

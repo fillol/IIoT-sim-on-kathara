@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Intermediate router 3 (for standard traffic)
 ip addr add 10.2.3.2/24 dev eth0    # br_23
 ip addr add 10.3.4.1/24 dev eth1    # net_cc_standard
@@ -9,3 +10,6 @@ sysctl -w net.ipv4.ip_forward=1
 
 # Route back to the rest of the network
 ip route add 10.0.0.0/8 via 10.2.3.1
+
+# Short path not always faster than the long one
+tc qdisc add dev eth2 root netem delay 250ms 20ms loss 2%
