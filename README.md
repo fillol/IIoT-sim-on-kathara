@@ -13,6 +13,8 @@ This project ports the original [Industrial IoT Simulator](https://github.com/fi
 
 This simulator emulates three production lines (pressing, welding, painting) with virtual sensors compliant with Industry 4.0 standards. It generates realistic data (vibration, temperature, quality) transmitted via **HTTP requests** over a **complex, multi-hop** Kathará-managed network.
 
+![Topology](topology.png)
+
 The data flows through a pipeline of microservices: data is first sent to a **Dropper** service that simulates network unreliability and routes traffic. Secure payloads are sent to a dedicated **Decrypter** service, while standard data goes directly to a **Fault Detector**. The Fault Detector analyzes the data, and if an anomaly is found, it sends an alert to a **Digital Twin** service, which acts as the final logging endpoint.
 
 ### Key Features (Inherited from original):
