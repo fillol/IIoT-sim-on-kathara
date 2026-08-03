@@ -1,0 +1,29 @@
+{
+    "line_id": "PAINT-LINE-FAT",
+    "sensors": [
+        {
+            "type": "vibration",
+            "interval": 0.1,
+            "payload": "medium",
+            "qos": 1
+        },
+        {
+            "type": "temperature",
+            "interval": 0.2,
+            "payload": "medium",
+            "qos": 1
+        },
+        {
+            "type": "quality",
+            "interval": 0.5,
+            "payload": "large",
+            "qos": 1
+        },
+        {
+            "type": "image_security",
+            "interval": 1.0,
+            "payload": "large",
+            "qos": 1
+        }
+    ]
+}

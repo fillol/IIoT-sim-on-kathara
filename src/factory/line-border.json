@@ -1,14 +1,8 @@
 {
-    "line_id": "PRESS-LINE-1",
+    "line_id": "WELDING-LINE-BORDER",
     "sensors": [
         {
             "type": "vibration",
-            "interval": 0.5,
-            "payload": "small",
-            "qos": 1
-        },
-        {
-            "type": "temperature",
             "interval": 1.0,
             "payload": "medium",
             "qos": 1
@@ -17,12 +11,6 @@
             "type": "quality",
             "interval": 3.0,
             "payload": "large",
-            "qos": 1
-        },
-        {
-            "type": "security",
-            "interval": 5.0,
-            "payload": "small",
             "qos": 1
         },
         {

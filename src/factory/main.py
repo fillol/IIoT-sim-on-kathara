@@ -4,6 +4,7 @@ import logging
 import time
 import requests
 import psutil
+import threading
 from sensors.base_sensor import SensorConfig
 from sensors import VibrationSensor, TemperatureSensor, QualitySensor, SecuritySensor, ImageSecuritySensor
 
@@ -14,7 +15,7 @@ logger = logging.getLogger("Producer")
 
 # All publishers send data to a single entry point: the Dropper service.
 # This service is responsible for simulating network issues and routing traffic.
-DROPPER_URL = os.getenv("DROPPER_URL", "http://10.2.0.2:5000/data")
+DROPPER_URL = os.getenv("DROPPER_URL", "http://10.255.255.1:5000/data")
 CONFIG_FILE_DIR = os.getenv("CONFIG_FILE_DIR", ".")
 
 
@@ -41,11 +42,26 @@ class ProductionLine:
                 sensors.append((s_class(self.config["line_id"], SensorConfig(cfg["type"], float(cfg["interval"]), cfg["payload"], int(cfg.get("qos",1)))), cfg))
         return sensors
 
+    def sensor_worker(self, sensor, config):
+        while True:
+            self.send_data(sensor, config)
+
     def run(self):
         logger.info(f"Starting REST producer for line {self.config.get('line_id', 'N/A')}")
-        while True:
-            for sensor, config in self.sensors:
-                self.send_data(sensor, config)
+
+        threads = []
+
+        for sensor, config in self.sensors:
+            t = threading.Thread(
+                target=self.sensor_worker,
+                args=(sensor, config),
+                daemon=True
+            )
+            t.start()
+            threads.append(t)
+
+        for t in threads:
+            t.join()
 
     def send_data(self, sensor, config):
         mem_before_kb = self.process.memory_info().rss / 1024
@@ -76,7 +92,7 @@ class ProductionLine:
 
 
 if __name__ == "__main__":
-    config_path = os.path.join(CONFIG_FILE_DIR, "line1.json")
+    config_path = os.path.join(CONFIG_FILE_DIR, "config.json")
     
     try:
         ProductionLine(config_path).run()

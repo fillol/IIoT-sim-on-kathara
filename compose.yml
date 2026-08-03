@@ -1,13 +1,36 @@
 # This Docker Compose file is for local testing without Kathará.
+
+x-production-line-base: &production-line-base
+  entrypoint: python main.py
+  environment:
+    - DROPPER_URL=http://dropper:5000/data
+  depends_on:
+    - dropper
+
 services:
   production-line-1:
-    build: ./src/publisher1
-    image: iiot-kathara/publisher1:latest
-    entrypoint: python main.py
-    environment:
-      - DROPPER_URL=http://dropper:5000/data
-    depends_on:
-      - dropper
+    <<: *production-line-base
+    build:
+      context: ./src/factory
+      args:
+        - CONFIG_FILE=line-video.json
+    image: iiot-kathara/producer-video:latest
+
+  production-line-2:
+    <<: *production-line-base
+    build:
+      context: ./src/factory
+      args:
+        - CONFIG_FILE=line-border.json
+    image: iiot-kathara/producer-border:latest
+
+  production-line-3:
+    <<: *production-line-base
+    build:
+      context: ./src/factory
+      args:
+        - CONFIG_FILE=line-sensor.json
+    image: iiot-kathara/producer-sensor:latest
 
   dropper:
     build: ./src/dropper
