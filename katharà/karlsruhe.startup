@@ -1,0 +1,24 @@
+ip link set dev eth0 up
+ip link set dev eth1 up
+
+# eth0 -> stuttgart
+tc qdisc add dev eth0 root tbf rate 2.925536MBps burst 32kbit latency 400ms
+# eth1 -> mannheim
+tc qdisc add dev eth1 root tbf rate 0.087306MBps burst 32kbit latency 400ms
+
+ip addr add 10.0.0.74/30 dev eth0
+ip addr add 10.0.0.77/30 dev eth1
+
+# Loopback servizio Decrypter
+ip link add dummy0 type dummy
+ip link set dev dummy0 up
+ip addr add 10.255.255.2/32 dev dummy0
+
+# Route verso Fault Detector (Nürnberg) via Stuttgart
+ip route add 10.255.255.3/32 via 10.0.0.73 src 10.255.255.2
+# Route di ritorno verso Dropper (Hannover) via Mannheim → Frankfurt
+ip route add 10.255.255.1/32 via 10.0.0.78 src 10.255.255.2
+
+# Avvio servizio Decrypter
+export FAULT_DETECTOR_URL="http://10.255.255.3:5000/data"
+cd /app && python main.py >> /shared/decrypter.log 2>&1 &

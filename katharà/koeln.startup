@@ -1,0 +1,14 @@
+ip link set dev eth0 up
+ip link set dev eth1 up
+ip link set dev eth2 up
+
+# eth0 -> frankfurt
+tc qdisc add dev eth0 root tbf rate 158.9514MBps burst 32kbit latency 400ms
+# eth1 -> duesseldorf
+tc qdisc add dev eth1 root tbf rate 0.473066MBps burst 32kbit latency 400ms
+# eth2 -> dortmund
+tc qdisc add dev eth2 root tbf rate 2.599501MBps burst 32kbit latency 400ms
+
+ip addr add 10.0.0.86/30 dev eth0
+ip addr add 10.0.0.89/30 dev eth1
+ip addr add 10.0.0.102/30 dev eth2

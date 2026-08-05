@@ -1,0 +1,15 @@
+ip link set dev eth0 up
+ip link set dev eth1 up
+
+# eth0 -> koeln
+tc qdisc add dev eth0 root tbf rate 0.260377MBps burst 32kbit latency 400ms
+# eth1 -> essen
+tc qdisc add dev eth1 root tbf rate 0.328128MBps burst 32kbit latency 400ms
+
+ip addr add 10.0.0.90/30 dev eth0
+ip addr add 10.0.0.93/30 dev eth1
+
+ip route add 10.255.255.1/32 via 10.0.0.94
+
+# ENV per il producer
+export DROPPER_URL="http://10.255.255.1:5000/data"

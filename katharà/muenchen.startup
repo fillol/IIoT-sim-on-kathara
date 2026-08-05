@@ -1,0 +1,21 @@
+ip link set dev eth0 up
+ip link set dev eth1 up
+
+# eth0 -> nuernberg
+tc qdisc add dev eth0 root tbf rate 2.261066MBps burst 32kbit latency 400ms
+# eth1 -> ulm
+tc qdisc add dev eth1 root tbf rate 0.046841MBps burst 32kbit latency 400ms
+
+ip addr add 10.0.0.62/30 dev eth0
+ip addr add 10.0.0.65/30 dev eth1
+
+# Loopback servizio Digital Twin
+ip link add dummy0 type dummy
+ip link set dev dummy0 up
+ip addr add 10.255.255.4/32 dev dummy0
+
+# Route di ritorno verso Fault Detector (Nürnberg) - link diretto
+ip route add 10.255.255.3/32 via 10.0.0.61 src 10.255.255.4
+
+# Avvio servizio Digital Twin
+cd /app && python main.py >> /shared/digital-twin.log 2>&1 &

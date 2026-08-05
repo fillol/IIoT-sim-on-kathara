@@ -1,0 +1,41 @@
+ip link set dev eth0 up
+ip link set dev eth1 up
+ip link set dev eth2 up
+ip link set dev eth3 up
+ip link set dev eth4 up
+ip link set dev eth5 up
+
+# eth0 -> bremen
+tc qdisc add dev eth0 root tbf rate 6.617165MBps burst 32kbit latency 400ms
+# eth1 -> hamburg
+tc qdisc add dev eth1 root tbf rate 8.804326MBps burst 32kbit latency 400ms
+# eth2 -> berlin
+tc qdisc add dev eth2 root tbf rate 15.501955MBps burst 32kbit latency 400ms
+# eth3 -> leipzig
+tc qdisc add dev eth3 root tbf rate 23.051417MBps burst 32kbit latency 400ms
+# eth4 -> frankfurt
+tc qdisc add dev eth4 root tbf rate 134.549342MBps burst 32kbit latency 400ms
+# eth5 -> dortmund
+tc qdisc add dev eth5 root tbf rate 10.494312MBps burst 32kbit latency 400ms
+
+ip link add dummy0 type dummy
+ip link set dev dummy0 up
+ip addr add 10.255.255.1/32 dev dummy0
+ip addr add 10.0.0.14/30 dev eth0
+ip addr add 10.0.0.18/30 dev eth1
+ip addr add 10.0.0.25/30 dev eth2
+ip addr add 10.0.0.29/30 dev eth3
+ip addr add 10.0.0.33/30 dev eth4
+ip addr add 10.0.0.37/30 dev eth5
+
+ip route add 10.0.0.8/30 via 10.0.0.13
+ip route add 10.0.0.92/30 via 10.0.0.38
+
+# Route verso i servizi downstream (via Frankfurt)
+ip route add 10.255.255.2/32 via 10.0.0.34 src 10.255.255.1
+ip route add 10.255.255.3/32 via 10.0.0.34 src 10.255.255.1
+
+# Avvio servizio Dropper
+export DECRYPTER_URL="http://10.255.255.2:5000/decrypt"
+export FAULT_DETECTOR_URL="http://10.255.255.3:5000/data"
+cd /app && python main.py >> /shared/dropper.log 2>&1 &

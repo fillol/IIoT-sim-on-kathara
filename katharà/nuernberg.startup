@@ -1,0 +1,34 @@
+ip link set dev eth0 up
+ip link set dev eth1 up
+ip link set dev eth2 up
+ip link set dev eth3 up
+
+# eth0 -> leipzig
+tc qdisc add dev eth0 root tbf rate 3.252653MBps burst 32kbit latency 400ms
+# eth1 -> frankfurt
+tc qdisc add dev eth1 root tbf rate 53.790961MBps burst 32kbit latency 400ms
+# eth2 -> stuttgart
+tc qdisc add dev eth2 root tbf rate 22.62821MBps burst 32kbit latency 400ms
+# eth3 -> muenchen
+tc qdisc add dev eth3 root tbf rate 3.300639MBps burst 32kbit latency 400ms
+
+ip addr add 10.0.0.50/30 dev eth0
+ip addr add 10.0.0.53/30 dev eth1
+ip addr add 10.0.0.57/30 dev eth2
+ip addr add 10.0.0.61/30 dev eth3
+
+# Loopback servizio Fault Detector
+ip link add dummy0 type dummy
+ip link set dev dummy0 up
+ip addr add 10.255.255.3/32 dev dummy0
+
+# Route verso Digital Twin (München) - link diretto
+ip route add 10.255.255.4/32 via 10.0.0.62 src 10.255.255.3
+# Route di ritorno verso Dropper (Hannover) via Frankfurt
+ip route add 10.255.255.1/32 via 10.0.0.54 src 10.255.255.3
+# Route di ritorno verso Decrypter (Karlsruhe) via Stuttgart
+ip route add 10.255.255.2/32 via 10.0.0.58 src 10.255.255.3
+
+# Avvio servizio Fault Detector
+export DIGITAL_TWIN_URL="http://10.255.255.4:5000/update"
+cd /app && python main.py >> /shared/fault-detector.log 2>&1 &

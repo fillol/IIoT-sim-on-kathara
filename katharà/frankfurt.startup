@@ -1,0 +1,27 @@
+ip link set dev eth0 up
+ip link set dev eth1 up
+ip link set dev eth2 up
+ip link set dev eth3 up
+ip link set dev eth4 up
+
+# eth0 -> hannover
+tc qdisc add dev eth0 root tbf rate 102.853161MBps burst 32kbit latency 400ms
+# eth1 -> leipzig
+tc qdisc add dev eth1 root tbf rate 218.446338MBps burst 32kbit latency 400ms
+# eth2 -> nuernberg
+tc qdisc add dev eth2 root tbf rate 58.675692MBps burst 32kbit latency 400ms
+# eth3 -> mannheim
+tc qdisc add dev eth3 root tbf rate 13.008753MBps burst 32kbit latency 400ms
+# eth4 -> koeln
+tc qdisc add dev eth4 root tbf rate 101.048982MBps burst 32kbit latency 400ms
+
+ip addr add 10.0.0.34/30 dev eth0
+ip addr add 10.0.0.46/30 dev eth1
+ip addr add 10.0.0.54/30 dev eth2
+ip addr add 10.0.0.82/30 dev eth3
+ip addr add 10.0.0.85/30 dev eth4
+
+# Route di transito per i servizi
+ip route add 10.255.255.1/32 via 10.0.0.33
+ip route add 10.255.255.2/32 via 10.0.0.81
+ip route add 10.255.255.3/32 via 10.0.0.53
