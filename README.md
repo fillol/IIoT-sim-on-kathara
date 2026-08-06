@@ -13,8 +13,6 @@ This project ports the original [Industrial IoT Simulator](https://github.com/fi
 
 This simulator emulates three production lines (pressing, welding, painting) with virtual sensors compliant with Industry 4.0 standards. It generates realistic data (vibration, temperature, quality) transmitted via **HTTP requests** over a **complex, multi-hop** Kathará-managed network.
 
-![Topology](topology.png)
-
 The data flows through a pipeline of microservices: data is first sent to a **Dropper** service that simulates network unreliability and routes traffic. Secure payloads are sent to a dedicated **Decrypter** service, while standard data goes directly to a **Fault Detector**. The Fault Detector analyzes the data, and if an anomaly is found, it sends an alert to a **Digital Twin** service, which acts as the final logging endpoint.
 
 ### Key Features (Inherited from original):
@@ -26,6 +24,7 @@ The data flows through a pipeline of microservices: data is first sent to a **Dr
 ### Kathará Adaptation:
 
 *   Uses Kathará for network topology definition and container orchestration (`lab.conf`, `.startup` files).
+*   **Nobel Germany Topology**: The network is modeled after the Nobel Germany backbone. Link bandwidths are actively shaped using Linux `tc qdisc` rules based on real traffic demands from the **SNDLib** dataset.
 *   Services communicate via HTTP requests using Flask, making the architecture robust and easily integrable.
 *   Allows for complex network setups (with **multiple intermediate routers** and dedicated paths) managed by Kathará.
 *   Provides interactive shells into each component via Kathará.
@@ -78,7 +77,10 @@ If you want to understand each part or debug the system, follow these steps:
     ```
 
 5.  **Monitor Output:**
-    You can watch the logs in the opened terminals or check the shared logs.
+    Services automatically output their logs to the shared lab folder. You can follow all microservice logs live from the host or any node:
+    ```bash
+    tail -f shared/*.log
+    ```
 
 ### Kathará Specific Notes:
 
@@ -136,9 +138,7 @@ CONCURRENCY=20      # Number of multiple requests to perform at a time
 │   ├── run.sh          # Main script to run the benchmark
 │   └── README.md       # Benchmark documentation
 └── src/                # Source code for the simulation components
-    ├── publisher1/     # Production Line 1 simulator (REST client)
-    ├── publisher2/     # Production Line 2 simulator
-    ├── publisher3/     # Production Line 3 simulator
+    ├── factory/        # Shared Production Line simulator (REST client) for all nodes
     ├── dropper/        # Simulates packet loss and routes traffic
     ├── decrypter/      # Decrypts secure payloads
     ├── fault-detector/ # Analyzes data and finds anomalies
@@ -151,7 +151,7 @@ CONCURRENCY=20      # Number of multiple requests to perform at a time
 
 #### 1. Production Lines (p1, p2, p3)
 
-*   **Implementation:** Python scripts (`src/publisherX/main.py`) that act as **REST clients**.
+*   **Implementation:** Python scripts (`src/factory/main.py`) that act as **REST clients**.
 *   **Function:** Simulates Vibration, Temperature, Quality, and Security sensors and sends all data via **HTTP POST requests** to the `Dropper` service.
 
 #### 2. Dropper
@@ -289,12 +289,13 @@ To reinforce the design choices of the simulator, the following reputable source
 
 To handle sensitive data securely, the architecture implements an end-to-end encryption flow.
 
-### SecuritySensor (in `publisher1`)
+### Encrypted Sensors (SecuritySensor & ImageSecuritySensor)
 
-*   Generates security-related events (e.g., access attempts).
-*   **Encrypts** the entire JSON payload at the source using the `cryptography` library (Fernet symmetric encryption).
+*   **SecuritySensor**: Generates security-related events (access attempts, status codes).
+*   **ImageSecuritySensor**: Generates encrypted Base64 image payloads for AI-based object detection.
+*   Both encrypt their entire JSON payload at the source using the `cryptography` library (Fernet symmetric encryption).
 *   Wraps the encrypted data in a new JSON object: `{"source": "secure", "encrypted_payload": "..."}`.
-*   Data from this sensor is sent to the `Dropper` service.
+*   Data from these sensors is sent to the `Dropper` service.
 
 ### Decrypter Service
 
@@ -314,10 +315,10 @@ To handle sensitive data securely, the architecture implements an end-to-end enc
 
 ### 🔧 Customizing Sensor Parameters
 
-1.  Modify the desired JSON configuration file (e.g., `src/publisher1/line1.json`) within your project directory. Change intervals or payload sizes.
+1.  Modify the desired JSON configuration file (e.g., `src/factory/line-video.json`) within your project directory. Change intervals or payload sizes.
 2.  Rebuild the specific Docker image if required (often JSON changes do not require a rebuild if mounted correctly, but check your `.startup` and `lab.conf`). If unsure, rebuild:
     ```bash
-    docker compose -f local-test.yml build publisher1  # Or the specific service
+    docker compose build factory  # Or the specific service
     ```
 3.  Restart the Kathará lab:
     ```bash
@@ -327,9 +328,9 @@ To handle sensitive data securely, the architecture implements an end-to-end enc
 
 ### 🏭 Adding a New Production Line (e.g., Line 4)
 
-1.  **Create Source Files:** Duplicate an existing publisher directory (e.g., copy `src/publisher1` to `src/publisher4`).
-2.  **Configure Line 4:** Create/modify `src/publisher4/line4.json` with the desired `line_id` and sensor configuration.
-3.  **Update Docker Build:** Add a service definition for `production-line-4` in `local-test.yml` pointing to the `src/publisher4` directory.
+1.  **Create Source Files:** Use the shared `factory` directory.
+2.  **Configure Line 4:** Create/modify a new JSON config in `src/factory/line4.json` with the desired `line_id` and sensor configuration.
+3.  **Update Docker Build:** The `factory` image is shared, so no new Docker build definition is strictly necessary.
 4.  **Update Kathará Config:**
     *   Add the new device (e.g., `p4`) to `lab.conf`, connecting it to the appropriate network(s).
     *   Specify the Docker image to use for `p4` (e.g., `src-production-line-4`).
@@ -346,7 +347,7 @@ To handle sensitive data securely, the architecture implements an end-to-end enc
 ### Other Modifications
 
 *   **Custom Alert Rules:** Modify `src/fault-detector/main.py` and rebuild/restart.
-*   **New Sensor Types:** Create new Python classes in `src/publisherX/sensors/`, register them, update JSON configs, rebuild images, and restart the lab.
+*   **New Sensor Types:** Create new Python classes in `src/factory/sensors/`, register them, update JSON configs, rebuild images, and restart the lab.
 *   **Network Topology:** Modify `lab.conf` to change connections, add routers, or introduce network impairments (using Kathará's advanced features).
 
 ---
