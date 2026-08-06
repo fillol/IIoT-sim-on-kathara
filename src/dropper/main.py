@@ -20,8 +20,8 @@ app = Flask(__name__)
 POISSON_LAMBDA = float(os.getenv("POISSON_LAMBDA", "0.1"))
 
 # Downstream service URLs are retrieved from environment variables for flexibility.
-DECRYPTER_URL = os.getenv("DECRYPTER_URL", "http://10.6.0.2:5000/decrypt")
-FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://10.3.4.2:5000/data")
+DECRYPTER_URL = os.getenv("DECRYPTER_URL", "http://10.255.255.2:5000/decrypt")
+FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://10.255.255.3:5000/data")
 
 @app.route('/data', methods=['POST'])
 def route_or_drop():
@@ -30,7 +30,7 @@ def route_or_drop():
     # A random value from a Poisson distribution is used to simulate packet loss.
     # If the value is greater than 0, the packet is "dropped".
     if np.random.poisson(lam=POISSON_LAMBDA) > 0:
-        logger.warning(f"SIMULATING PACKET LOSS: Message ({payload_size_kb:.2f} KB) dropped based on Poisson distribution.")
+        logger.warning(f"[ALERT] PACKET LOSS: Message ({payload_size_kb:.2f} KB) dropped (Poisson distribution).")
         # We return a 200 OK to the client to simulate a packet lost in transit,
         # where the client believes the send was successful.
         return {"status": "dropped"}, 200
@@ -59,4 +59,4 @@ def route_or_drop():
 
 if __name__ == "__main__":
     logger.info(f"Dropper service starting... Packet drop rate (Poisson lambda) is {POISSON_LAMBDA}.")
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, threaded=True)

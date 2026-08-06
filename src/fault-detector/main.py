@@ -20,7 +20,7 @@ logger = logging.getLogger("FaultDetector")
 
 app = Flask(__name__)
 
-DIGITAL_TWIN_URL = os.getenv("DIGITAL_TWIN_URL", "http://10.7.0.2:5000/update")
+DIGITAL_TWIN_URL = os.getenv("DIGITAL_TWIN_URL", "http://10.255.255.4:5000/update")
 
 try:
     RAM_LOAD_MB = 1024
@@ -137,23 +137,32 @@ def process_message(payload_dict, payload_size_kb):
                     "alert_type": "Unauthorized Object Detected", 
                     "message": f"Unauthorized object '{predicted_class_name}' detected by {sensor_id} on line {line_id}!"
                 }
-                logger.critical(alert["message"])
+                logger.warning(f"[ALERT] {alert['message']}")
                 forward_alert_to_digital_twin(alert)
             return
 
         # Rule set for standard industrial sensor data.
+        # NOTE: All simulated alerts use logger.warning + [ALERT] prefix to distinguish
+        # them from real application errors (which use logger.error without prefix).
         if sensor_type == "vibration" and payload_dict.get('x', 0) > 8.0:
             alert = {**payload_dict, "alert_type": "High Vibration", "message": f"High vibration on {line_id}/{sensor_id}! Value: {payload_dict.get('x', 0):.2f} mm/s"}
-            logger.warning(alert["message"])
+            logger.warning(f"[ALERT] {alert['message']}")
             forward_alert_to_digital_twin(alert)
         elif sensor_type == "quality" and payload_dict.get('defect_count', 0) > 3:
             alert = {**payload_dict, "alert_type": "Quality Alert", "message": f"Quality alert on {line_id}/{sensor_id}! {payload_dict.get('defect_count', 0)} defects detected."}
-            logger.error(alert["message"])
+            logger.warning(f"[ALERT] {alert['message']}")
             forward_alert_to_digital_twin(alert)
         elif sensor_type == "temperature" and payload_dict.get('motor_temp', 0) > 85.0:
             alert = {**payload_dict, "alert_type": "High Temperature", "message": f"High temperature on {line_id}/{sensor_id}! Value: {payload_dict.get('motor_temp', 0):.1f}°C"}
-            logger.warning(alert["message"])
+            logger.warning(f"[ALERT] {alert['message']}")
             forward_alert_to_digital_twin(alert)
+        elif sensor_type == "security":
+            status_code = payload_dict.get('status_code', 200)
+            criticality = payload_dict.get('criticality', 'Low')
+            if status_code in (401, 403, 500):
+                alert = {**payload_dict, "alert_type": "Security Breach", "message": f"Security breach on {line_id}/{sensor_id}! Status: {status_code}, Criticality: {criticality}, Attempts: {payload_dict.get('access_attempts', 0)}"}
+                logger.warning(f"[ALERT] {alert['message']}")
+                forward_alert_to_digital_twin(alert)
 
     except Exception as e:
         logger.error(f"Error processing message in fault detector: {e}", exc_info=True)
@@ -172,4 +181,4 @@ def receive_data():
 
 if __name__ == "__main__":
     logger.info("Fault Detection service starting...")
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, threaded=True)

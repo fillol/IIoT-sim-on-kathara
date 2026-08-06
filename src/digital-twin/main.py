@@ -58,4 +58,4 @@ def receive_alert():
 if __name__ == "__main__":
     logger.info("Digital Twin service starting...")
     logger.info(f"State storage is located at: {STATE_STORAGE_PATH}")
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, threaded=True)

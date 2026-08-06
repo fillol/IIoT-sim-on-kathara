@@ -26,7 +26,7 @@ except Exception as e:
     REFERENCE_DATASET = None
 
 # URL of the next service in the pipeline for decrypted data.
-FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://10.4.4.2:5000/data")
+FAULT_DETECTOR_URL = os.getenv("FAULT_DETECTOR_URL", "http://10.255.255.3:5000/data")
 
 # MUST match the one used by the SecuritySensor
 ENCRYPTION_KEY = b'u25A1N5g-jPAAZ_2CBl2i8o_HAG8AAnYq0_s2An1gE0='
@@ -70,4 +70,4 @@ def decrypt_and_forward():
 
 if __name__ == "__main__":
     logger.info("Decrypter service starting as a Flask server...")
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, threaded=True)
