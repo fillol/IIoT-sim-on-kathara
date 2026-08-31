@@ -1,7 +1,6 @@
 import logging
 import json
 import os
-import psutil
 import requests
 from flask import Flask, request
 from cryptography.fernet import Fernet

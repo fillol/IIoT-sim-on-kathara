@@ -2,7 +2,6 @@ import logging
 import warnings
 import json
 import os
-import psutil
 import requests
 from flask import Flask, request
 import numpy as np
