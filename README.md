@@ -39,11 +39,14 @@ The data flows through a pipeline of microservices: data is first sent to a **Dr
 
 ### ⚡ Quick Start (Unified Command)
 
-For a fast run, you can build and launch everything with a single command. This will start the network, monitor the logs of `p1`, and clean up everything when you terminate it:
+For a fast run, you can build and launch everything with a single command. This will start the network, monitor the logs of `berlin`, and clean up everything when you terminate it:
 
 ```bash
-docker compose build && sudo kathara lstart --noterminals && sudo kathara connect --logs p1 && sudo kathara lclean
+docker compose build && cd katharà/ ; sudo kathara lstart --noterminals && sudo kathara connect --logs berlin && sudo kathara lclean
 ```
+
+Once inside the shell, start the data generation process by running `python main.py`. This will begin streaming data into the pipeline.
+Optionally, you can attach to additional producer shells (`hamburg` and `duesseldorf`) to spin them up as well.
 
 ---
 
